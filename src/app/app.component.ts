@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'JukeBox Auroro App';
+  title = 'JukeBox Aurora App';
   // TODO - to put this into services/interface
   client_id = '976b920abb9946b987f1dfe7e95c1942';
   client_secret = '049a3cf08f10408183111691d56fd6c0';
