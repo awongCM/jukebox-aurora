@@ -1,25 +1,36 @@
-<!--The content below is only a placeholder and can be replaced.-->
+<!-- The content below is only a placeholder and can be replaced.
 <div style="text-align:center">
   <h1>
     Welcome to {{ title }}!
   </h1>
   <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
+</div> -->
+
 <!-- TODOS -->
-<h2>My Album Tracks</h2>
-<ul>
-  <li *ngFor="let track of tracks">
-    <p>ID: {{track.track_number}}</p>
-    <p>Title: {{track.name}}</p>
-    <p>Album: {{track.album.name}}</p>
-    <div>
-        <p>Album Art</p>
-        <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
+<h2>{{title}}</h2>
+
+<div id="fullscreen">
+    <div class="container">
+        <ul class="gallery centerised expanded" id="gallery">
+            <li *ngFor="let track of tracks">
+              <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
+              <p>ID: {{track.track_number}}</p>
+              <p>Title: {{track.name}}</p>
+              <p>Album: {{track.album.name}}</p>
+              <p>Artist: {{track.artists[0].name}}</p>
+              <audio controls muted src="{{track.preview_url}}"></audio>    
+            </li>
+        </ul>
+    </div>    
+</div>
+
+<!-- JukeBox -->
+<div class="player" style="animation-play-state: paused;">
+    <div class="disc" id="disc" style="background-image: url(&quot;https://cdn.stocksnap.io/img-thumbs/960w/GOAQ3R7BCE.jpg&quot;); animation-play-state: paused;"></div>
+    <label>Currently Playing</label>
+    <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> <span>Lauri</span></h2>
+    <div class="controls">
+      <a href="#" class="play"><i class="fa fa-play"></i></a>
     </div>
-    <p>Artist: {{track.artists[0].name}}</p>
-
-    <audio controls muted src="{{track.preview_url}}"></audio>
-    
-  </li>
-</ul>
-
+    <!-- <audio controls muted src="{{track.preview_url}}"></audio>  -->
+  </div>

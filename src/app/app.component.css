@@ -1,0 +1,206 @@
+/* TODOS */
+
+#fullscreen {
+  background-color: inherit;
+  background-image: inherit;
+  height: 100%;
+  width: 100%;
+}
+
+/* Rotating Tracks Carousel */
+
+.container {
+  position: relative;
+  height: 300px;
+}
+
+ul.gallery {
+  padding: 20vh 0;
+  width: 100%;
+  height: auto;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scroll: touch;
+}
+
+.centerised {
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  transform: translate3d(0%, -50%, 0);
+}
+
+ul.gallery > li {
+  white-space: normal;
+  width: 200px;
+  width: 12vw;
+  height: 9vw;
+  overflow: hidden;
+  -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.1)));
+  display: inline-block;
+  margin-left: -4vw;
+  transform-origin: 40% 40%;
+  transform: translate3d(0, 0, 0) perspective(15vw) rotateY(-55deg);
+  position: relative;
+  opacity: 1;
+  transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
+}
+
+ul.gallery > li img {
+  display: block;
+  z-index: 1;
+  position: relative;
+  height: 100%;
+}
+
+ul.gallery.expanded > li {
+  width: 8.4vw;
+  height: 8.4vw;
+  margin-left: -0.7vw;
+  transform: none;
+}
+
+ul.gallery.expanded > li img {
+  left: -25%;
+}
+
+/* end Rotating Tracks Carousel */
+
+
+/* Disc Player section */
+
+div.player {
+  background: #eaeaea;
+  background: linear-gradient(#DB5377,  #F2BD61);
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+  border-bottom-left-radius: 3%;
+  border-bottom-right-radius: 3%;
+  box-shadow: 0px 2px 2px 0px #999;
+  width: 300px;
+  overflow: hidden;
+  padding: 20px;
+  padding-top: 60px;
+  margin: 0 auto 40px;
+  text-align: center;
+  position: relative;
+  top: -25px;
+  height: 360px;
+  border: 20px solid #af6b05f2;
+  animation: lighting 5s infinite;
+  -webkit-animation-play-state: paused;
+}
+div.player div.disc {
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0px 0px 2px #888;
+  margin-bottom: 10px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  background-image: url(http://images.genius.com/88c5ded1a0566dff01af570134b73722.1000x1000x1.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 1;
+  /* -webkit-animation: rotation 10s 1 ease-in-out; */
+  -webkit-animation: rotation 2s linear infinite;
+  -webkit-animation-play-state: paused;
+}
+div.player div.disc:after {
+  position: absolute;
+  top: 37%;
+  left: 37%;
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.6);
+  content: '';
+  display: block;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border: 2px solid #eaeaea;
+  z-index: 2;
+}
+div.player div.disc:before {
+  position: absolute;
+  top: 48%;
+  left: 48%;
+  width: 10px;
+  height: 10px;
+  background: #000;
+  content: '';
+  display: block;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  z-index: 3;
+}
+div.player label {
+  font-size: 0.9em;
+  text-transform: uppercase;
+  color: #bababa;
+  display: none;
+}
+.player-title {
+  margin: 5px;
+  font-size: 18px;
+}
+div.player div.controls {
+  /* padding: 10px 0; */
+}
+div.player div.controls .play {
+  text-align: center;
+  display: inline-block;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  font-size: 24px;
+  background: #486d9a;
+  color: #FFF;
+  height: 50px;
+  width: 50px;
+  line-height: 50px;
+  position: relative;
+}
+
+div.player div.controls .play i{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -10px;
+  margin-left: -9px;
+}
+
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes lighting {
+  0% {
+    border-color: #9fffb4
+  }
+  20% {
+    border-color: #f09fff;
+  }
+  40% {
+    border-color: #9fedff;
+  }
+  60% {
+    border-color: #f9ff9f;
+  }
+  80% {
+    border-color: #ffa89f;
+  }
+  99% {
+    border-color: #bb9fff;
+  }
+}
