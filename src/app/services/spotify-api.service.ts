@@ -45,13 +45,6 @@ export class SpotifyAPIService {
   }
 
   /**
-   * getUserTracks
-   */
-  public getUserTracks(): any {
-    return this.getData('https://api.spotify.com/v1/me/tracks/');
-  }
-
-  /**
    * getHashParams
    */
   public getHashParams(): any {
@@ -115,4 +108,12 @@ export class SpotifyAPIService {
 
     return options;
   }
+
+  /**
+   * getUserTracks
+   */
+  public getUserTracks(): any {
+    return this.getData('https://api.spotify.com/v1/me/tracks/');
+  }
+
 }
