@@ -1,5 +1,14 @@
 /* TODOS */
 
+.menu-container {
+  height: 100px;
+  text-align: center;
+}
+.menu-container .menu-inline-block{
+  display: inline-block;
+  vertical-align: middle;
+}
+
 #fullscreen {
   background-color: inherit;
   background-image: inherit;
