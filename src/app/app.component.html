@@ -10,7 +10,7 @@
 </div>
 
 
-<div *ngIf="accessToken" id="fullscreen">
+<div *ngIf="canRetrieveUserTracks(accessToken)" id="fullscreen">
     <div class="container">
         <ul class="gallery centerised expanded" id="gallery">
             <li *ngFor="let track of tracks">

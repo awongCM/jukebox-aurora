@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Http, Response, RequestOptions, Headers, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/map';
+import { accessSync } from 'fs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'JukeBox Aurora App';
   
   // TODO - to put this into services/interface
@@ -28,30 +29,6 @@ export class AppComponent {
 
   constructor(private http: Http) {
     console.log('Hello Jukebox Aurora App initialised');
-
-    const hashParams = this.getHashParams(),
-          { access_token, token_type, state } = hashParams;
-
-    const storedState = localStorage.getItem(this.state_key);
-
-    if (access_token && (state == null || state !== storedState)) {
-      alert('Authentication Error detected');
-    } else {
-      localStorage.removeItem(this.state_key);
-      if (access_token) {
-        console.log('access token found!', access_token);
-        console.log('token type found!', token_type);
-        console.log('state found!', state);
-
-        // remove hash
-        window.location.hash = '';
-
-        this.accessToken = access_token;
-        this.tokenType = token_type;
-
-        this.getUserTracks();
-      }
-    }
   }
 
   /**
@@ -69,12 +46,54 @@ export class AppComponent {
     window.location.reload();
   }
 
+  ngOnInit(): void {
+    this.checkValidAuthorization();
+  }
+
+  /**
+   * checkValidAuthorization
+   */
+  public checkValidAuthorization(): void {
+    const hashParams = this.getHashParams(),
+          { access_token, token_type, state } = hashParams;
+
+    const storedState = localStorage.getItem(this.state_key);
+
+    if (access_token && (state == null || state !== storedState)) {
+      alert('Authentication Error detected');
+    } else {
+      localStorage.removeItem(this.state_key);
+      if (access_token) {
+        // console.log('access token found!', access_token);
+        // console.log('token type found!', token_type);
+        // console.log('state found!', state);
+
+        // remove hash
+        window.location.hash = '';
+
+        this.accessToken = access_token;
+        this.tokenType = token_type;
+      }
+    }
+  }
+
+  /**
+   * canRetrieveUserTracks(accessToken)
+   */
+  public canRetrieveUserTracks(accessToken): boolean {
+    if (accessToken) {
+      this.getUserTracks();
+      return true;
+    }
+    return false;
+  }
+
   /**
    * getUserTracks
    */
   public getUserTracks(): void {
     this.getData('https://api.spotify.com/v1/me/tracks/').subscribe(data => {
-      console.log(data.items);
+      console.log('data.items', data.items);
       this.data = data;
 
       let tracks = data.items.map( (item) => item.track);
