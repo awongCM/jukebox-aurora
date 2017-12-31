@@ -29,12 +29,10 @@ export class AppComponent {
   constructor(private http: Http) {
     console.log('Hello Jukebox Aurora App initialised');
 
-    const hashParams = this.getHashParams();
+    const hashParams = this.getHashParams(),
+          { access_token, token_type, state } = hashParams;
 
-    const access_token = hashParams.access_token,
-          token_type = hashParams.token_type,
-          state = hashParams.state,
-          storedState = localStorage.getItem(this.state_key);
+    const storedState = localStorage.getItem(this.state_key);
 
     if (access_token && (state == null || state !== storedState)) {
       alert('Authentication Error detected');
@@ -74,7 +72,7 @@ export class AppComponent {
   /**
    * getUserTracks
    */
-  public getUserTracks() {
+  public getUserTracks(): void {
     this.getData('https://api.spotify.com/v1/me/tracks/').subscribe(data => {
       console.log(data.items);
       this.data = data;
@@ -88,7 +86,7 @@ export class AppComponent {
   /**
    * getHashParams
    */
-  public getHashParams() {
+  public getHashParams(): any {
     const hashParams = {};
     let e, r = /([^&;=]+)=?([^&;]*)/g,
         q = window.location.hash.substring(1);
@@ -98,7 +96,7 @@ export class AppComponent {
     return hashParams;
   }
 
-  private _generateRandomString(length) {
+  private _generateRandomString(length): string {
     let random_str = '';
     const combinations = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -111,7 +109,7 @@ export class AppComponent {
   /**
    * requestAuthorization using implicit grant access only
    */
-  public requestAuthorization() {
+  public requestAuthorization(): void {
     let authorizationTokenUrl = 'https://accounts.spotify.com/authorize';
 
     let state_value = this._generateRandomString(16);
@@ -128,7 +126,7 @@ export class AppComponent {
   /**
    * endAuthorizationRequest
    */
-  public endAuthorizationRequest() {
+  public endAuthorizationRequest(): void {
     this.accessToken = null;
   }
 
@@ -142,7 +140,7 @@ export class AppComponent {
   /**
    * getOptions
    */
-  public getOptions() {
+  public getOptions(): any {
     let headers = new Headers();
     headers.append('Authorization', this.tokenType + ' ' + this.accessToken);
     let options = new RequestOptions({headers: headers});
