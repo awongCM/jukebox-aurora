@@ -6,13 +6,15 @@
   <div class="menu-inline-block">
     <button *ngIf="!hasValidToken()" (click)="login()">Log In</button>
     <button *ngIf="hasValidToken()" (click)="logout()">Log Out</button>
+    <button class="toggleBtn" *ngIf="hasValidToken()" (click)="toggle()">Toggle</button>
+    <button class="toggleBtn" *ngIf="hasValidToken()" (click)="fullscreen()">FullScreen</button>
   </div>
 </div>
 
 
 <div *ngIf="hasValidToken()" id="fullscreen">
     <div class="container">
-        <ul class="gallery centerised expanded" id="gallery">
+        <ul class="gallery centerised" id="gallery">
             <li *ngFor="let track of tracks">
               <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
               <p>ID: {{track.track_number}}</p>
@@ -22,16 +24,16 @@
               <audio controls muted src="{{track.preview_url}}"></audio>    
             </li>
         </ul>
-    </div>    
-</div>
-
-<!-- JukeBox -->
-<div *ngIf="hasValidToken()" class="player" style="animation-play-state: paused;">
-    <div class="disc" id="disc" style="background-image: url(&quot;https://cdn.stocksnap.io/img-thumbs/960w/GOAQ3R7BCE.jpg&quot;); animation-play-state: paused;"></div>
-    <label>Currently Playing</label>
-    <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> <span>Lauri</span></h2>
-    <div class="controls">
-      <a href="#" class="play"><i class="fa fa-play"></i></a>
     </div>
-    <!-- <audio controls muted src="{{track.preview_url}}"></audio>  -->
-  </div>
+    
+    <!-- JukeBox -->
+    <div class="player" style="animation-play-state: paused;">
+      <div class="disc" id="disc" style="background-image: url(&quot;https://cdn.stocksnap.io/img-thumbs/960w/GOAQ3R7BCE.jpg&quot;); animation-play-state: paused;"></div>
+      <label>Currently Playing</label>
+      <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> <span>Lauri</span></h2>
+      <div class="controls">
+        <a href="#" class="play"><i class="fa fa-play"></i></a>
+      </div>
+      <!-- <audio controls muted src="{{track.preview_url}}"></audio>  -->
+    </div>
+</div>

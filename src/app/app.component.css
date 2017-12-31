@@ -9,9 +9,14 @@
   vertical-align: middle;
 }
 
+.toggleBtn {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border-radius: 20px;
+}
+
 #fullscreen {
-  background-color: inherit;
-  background-image: inherit;
+  background: #13004e;
   height: 100%;
   width: 100%;
 }
@@ -64,14 +69,14 @@ ul.gallery > li img {
   height: 100%;
 }
 
-ul.gallery.expanded > li {
+ul.gallery.js-expanded > li {
   width: 8.4vw;
   height: 8.4vw;
   margin-left: -0.7vw;
   transform: none;
 }
 
-ul.gallery.expanded > li img {
+ul.gallery.js-expanded > li img {
   left: -25%;
 }
 

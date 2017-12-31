@@ -15,21 +15,6 @@ export class AppComponent implements OnInit {
     console.log('Hello Jukebox Aurora App initialised');
   }
 
-  /**
-   * login Spotify Account
-   */
-  login() {
-    this.spotifyAPI.requestAuthorization();
-  }
-
-  /**
-   * logout Spotify Account
-   */
-  logout() {
-    this.spotifyAPI.endAuthorizationRequest();
-    window.location.reload();
-  }
-
   ngOnInit(): void {
     this.spotifyAPI.checkValidAuthorization();
 
@@ -42,6 +27,33 @@ export class AppComponent implements OnInit {
     }
   }
 
+  login() {
+    this.spotifyAPI.requestAuthorization();
+  }
+
+  logout() {
+    this.spotifyAPI.endAuthorizationRequest();
+    window.location.reload();
+  }
+
+  toggle() {
+    document.getElementById('gallery').classList.toggle('js-expanded');
+  }
+
+  fullscreen() {
+    let fullScreen = document.getElementById('fullscreen');
+
+    if (fullScreen.requestFullscreen) {
+      fullScreen.requestFullscreen();
+		} else if (fullScreen.mozRequestFullScreen) {
+      fullScreen.mozRequestFullScreen();
+		} else if (fullScreen.webkitRequestFullscreen) {
+      fullScreen.webkitRequestFullscreen();
+		} else if (fullScreen.msRequestFullscreen) {
+      fullScreen.msRequestFullscreen();
+		}
+
+  }
   /**
    * hasValidToken
    */
