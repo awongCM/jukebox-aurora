@@ -4,13 +4,13 @@
     <h2>{{title}}</h2>
   </div>
   <div class="menu-inline-block">
-    <button *ngIf="!accessToken" (click)="login()">Log In</button>
-    <button *ngIf="accessToken" (click)="logout()">Log Out</button>
+    <button *ngIf="!hasValidToken()" (click)="login()">Log In</button>
+    <button *ngIf="hasValidToken()" (click)="logout()">Log Out</button>
   </div>
 </div>
 
 
-<div *ngIf="canRetrieveUserTracks(accessToken)" id="fullscreen">
+<div *ngIf="hasValidToken()" id="fullscreen">
     <div class="container">
         <ul class="gallery centerised expanded" id="gallery">
             <li *ngFor="let track of tracks">
@@ -26,7 +26,7 @@
 </div>
 
 <!-- JukeBox -->
-<div *ngIf="accessToken" class="player" style="animation-play-state: paused;">
+<div *ngIf="hasValidToken()" class="player" style="animation-play-state: paused;">
     <div class="disc" id="disc" style="background-image: url(&quot;https://cdn.stocksnap.io/img-thumbs/960w/GOAQ3R7BCE.jpg&quot;); animation-play-state: paused;"></div>
     <label>Currently Playing</label>
     <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> <span>Lauri</span></h2>

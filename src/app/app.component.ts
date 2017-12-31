@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Http, Response, RequestOptions, Headers, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/map';
-import { accessSync } from 'fs';
 
 @Component({
   selector: 'app-root',
@@ -48,6 +47,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkValidAuthorization();
+
+    //load user tracks if a valid token has been successfully obtained;
+    if (this.hasValidToken()) {
+      this.getUserTracks();
+    }
   }
 
   /**
@@ -78,11 +82,10 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * canRetrieveUserTracks(accessToken)
+   * hasValidToken
    */
-  public canRetrieveUserTracks(accessToken): boolean {
-    if (accessToken) {
-      this.getUserTracks();
+  public hasValidToken(): boolean {
+    if (this.accessToken) {
       return true;
     }
     return false;
