@@ -35,8 +35,8 @@ ul.gallery {
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
-  overflow-x: auto;
-  -webkit-overflow-scroll: touch;
+  /* overflow-x: auto;
+  -webkit-overflow-scroll: touch; */
 }
 
 .centerised {

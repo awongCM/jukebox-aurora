@@ -14,7 +14,7 @@
 
 <div *ngIf="hasValidToken()" id="fullscreen">
     <div class="container">
-        <ul class="gallery centerised" id="gallery">
+        <ul (mouseover)="scroll_tracks($event)" class="gallery centerised" id="gallery">
             <li *ngFor="let track of tracks">
               <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
               <p>ID: {{track.track_number}}</p>

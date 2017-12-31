@@ -11,6 +11,22 @@ export class AppComponent implements OnInit {
 
   private tracks: any[];
 
+  // gallery properties
+  readonly THRESHOLD: Number = 0.6;
+  readonly MAX_SPEED: Number = 25;
+  readonly DEFAULT_SPEED: Number = 7;
+  readonly LEFT: String = 'left';
+  readonly RIGHT: String = 'right';
+
+  private scrolling: number;
+  private pageX: number;
+  private screenWidth: number;
+  private currentPosPercentage: number;
+  private speed: number;
+  private newPos: number;
+  private positionPercentage: number;
+  private speedPercentage: number;
+
   constructor(public spotifyAPI: SpotifyAPIService) {
     console.log('Hello Jukebox Aurora App initialised');
   }
@@ -52,8 +68,46 @@ export class AppComponent implements OnInit {
 		} else if (fullScreen.msRequestFullscreen) {
       fullScreen.msRequestFullscreen();
 		}
-
   }
+
+  // TODOS
+  scroll_tracks(event) {
+    this.pageX = event.clientX || event.screenX;
+    this.screenWidth = window.innerWidth;
+    this.currentPosPercentage = (this.screenWidth - this.pageX) / this.screenWidth;
+
+    if (this.currentPosPercentage > this.THRESHOLD) {
+      // speed = calculateSpeed(LEFT, currentPosPercentage);
+      // setScroll(LEFT,speed);
+      this.setScroll(this.LEFT, this.DEFAULT_SPEED);
+    } else if (this.currentPosPercentage < (1 - this.THRESHOLD)) {
+      // speed = calculateSpeed(RIGHT, currentPosPercentage);
+      // setScroll(RIGHT,speed);
+      this.setScroll(this.RIGHT, this.DEFAULT_SPEED);
+    } else {
+      this.endScroll();
+    }
+  }
+
+  private calculateSpeed(direction, ratio) {
+    this.positionPercentage = direction === this.LEFT ? ratio : 1 - ratio;
+    this.speedPercentage = (this.positionPercentage - this.THRESHOLD) / (1 - this.THRESHOLD);
+
+    return this.speedPercentage * this.MAX_SPEED;
+  }
+
+  private setScroll(direction, speed) {
+    this.endScroll();
+		this.scrolling = setInterval( () => {
+        this.newPos = direction === this.LEFT ? (-1 * speed) : speed;
+        document.getElementById('gallery').scrollLeft += this.newPos;
+			}, 10);
+  }
+
+  private endScroll() {
+    clearInterval(this.scrolling);
+  }
+
   /**
    * hasValidToken
    */
