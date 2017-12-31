@@ -20,7 +20,7 @@
               <p>ID: {{track.track_number}}</p>
               <p>Title: {{track.name}}</p>
               <p>Album: {{track.album.name}}</p>
-              <p>Artist: {{track.artists[0].name}}</p>
+              <span>{{track.artists[0].name}}</span>
               <audio controls muted src="{{track.preview_url}}"></audio>    
             </li>
         </ul>

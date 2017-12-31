@@ -62,6 +62,36 @@ ul.gallery > li {
   transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
 }
 
+ul.gallery > li:hover, .gallery > li:active {
+  transform: translate3d(1vw, 0, 0) perspective(15vw) scale(1.1) rotateY(-35deg);
+  z-index: 99;
+}
+ul.gallery > li:hover:after, .gallery > li:active:after {
+  opacity: 0.2;
+}
+ul.gallery > li:hover span, .gallery > li:active span {
+  opacity: 0.9;
+  transform: translate(0);
+}
+
+ul.gallery > li span {
+  font-size: 14px;
+  color: orange;
+  text-align: right;
+  position: absolute;
+  transform: translate3d(0, 0px, 0);
+  text-transform: uppercase;
+  opacity: 0;
+  display: block;
+  width: 80%;
+  bottom: 2vw;
+  right: 3vw;
+  z-index: 3;
+  font-weight: bold;
+  transition: all 0.05s ease-out;
+  /* text-shadow: 1px 1px 1px #888, 2px 2px 1px #888, 3px 3px 1px #888, 4px 4px 1px #888, 5px 5px 1px #888, 6px 6px 1px #888, 7px 7px 1px #888, 8px 8px 1px #888, 9px 9px 1px #888, 10px 10px 1px #888, 11px 11px 1px #888, 12px 12px 1px #888, 13px 13px 1px #888, 14px 14px 1px #888, 15px 15px 1px #888, 16px 16px 1px #888, 17px 17px 1px #888, 18px 18px 1px #888, 19px 19px 1px #888, 20px 20px 1px #888, 21px 21px 1px #888, 22px 22px 1px #888, 23px 23px 1px #888, 24px 24px 1px #888, 25px 25px 1px #888, 26px 26px 1px #888, 27px 27px 1px #888, 28px 28px 1px #888, 29px 29px 1px #888, 30px 30px 1px #888, 31px 31px 1px #888, 32px 32px 1px #888, 33px 33px 1px #888, 34px 34px 1px #888, 35px 35px 1px #888, 36px 36px 1px #888, 37px 37px 1px #888, 38px 38px 1px #888, 39px 39px 1px #888, 40px 40px 1px #888; */
+}
+
 ul.gallery > li img {
   display: block;
   z-index: 1;
