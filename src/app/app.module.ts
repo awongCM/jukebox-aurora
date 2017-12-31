@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
+import { SpotifyAPIService } from './services/spotify-api.service';
 
 
 @NgModule({
@@ -13,7 +14,7 @@ import { AppComponent } from './app.component';
     BrowserModule,
     HttpModule
   ],
-  providers: [],
+  providers: [SpotifyAPIService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
