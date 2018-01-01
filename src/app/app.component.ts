@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
   }
 
   fullscreen() {
-    let fullScreen = document.getElementById('fullscreen');
+    let fullScreen = <HTMLDivElement>document.getElementById('fullscreen');
 
     if (fullScreen.requestFullscreen) {
       fullScreen.requestFullscreen();
