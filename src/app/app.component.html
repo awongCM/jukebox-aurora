@@ -15,7 +15,7 @@
 <div *ngIf="hasValidToken()" id="fullscreen">
     <div class="container">
         <ul (mouseover)="scroll_tracks($event)" class="gallery centerised" id="gallery">
-            <li *ngFor="let track of tracks">
+            <li *ngFor="let track of tracks" (click)="track_select(track)">
               <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
               <p>ID: {{track.track_number}}</p>
               <p>Title: {{track.name}}</p>
@@ -27,13 +27,14 @@
     </div>
     
     <!-- JukeBox -->
-    <div class="player" style="animation-play-state: paused;">
-      <div class="disc" id="disc" style="background-image: url(&quot;https://cdn.stocksnap.io/img-thumbs/960w/GOAQ3R7BCE.jpg&quot;); animation-play-state: paused;"></div>
+    <div class="player" [ngClass]="isPlaying ? 'playing':''" [ngStyle]="{ 'animation-play-state': pause_play_state() }">
+      <div class="disc" id="disc" [ngStyle]="{ 'background-image': 'url(' + display_album_artwork() + ')', 'animation-play-state': pause_play_state()}" ></div>
       <label>Currently Playing</label>
-      <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> <span>Lauri</span></h2>
+      <h2 class="player-title" id="player-title">{{display_album_title()}}<i class="fa fa-music"></i><span></span></h2>
       <div class="controls">
-        <a href="#" class="play"><i class="fa fa-play"></i></a>
+        <a href="#" class="play" (click)="pause_play_track($event)"><i class="fa" [ngClass]="isPlaying ? 'fa-pause' : 'fa-play'"></i></a>
       </div>
-      <!-- <audio controls muted src="{{track.preview_url}}"></audio>  -->
+      <!-- TODO: to implement full music track playback https://beta.developer.spotify.com/documentation/web-playback-sdk/quick-start/  -->
+      <audio id="player_audio" *ngIf="selected_track" src="{{display_album_url()}}" (ended)="reset_play_state()" style="display: none;"></audio> 
     </div>
 </div>

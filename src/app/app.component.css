@@ -60,6 +60,7 @@ ul.gallery > li {
   position: relative;
   opacity: 1;
   transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
+  cursor: pointer;
 }
 
 ul.gallery > li:hover, .gallery > li:active {
@@ -126,12 +127,12 @@ div.player {
   width: 300px;
   overflow: hidden;
   padding: 20px;
-  padding-top: 60px;
+  padding-top: 40px;
   margin: 0 auto 40px;
   text-align: center;
   position: relative;
   top: -25px;
-  height: 360px;
+  height: 380px;
   border: 20px solid #af6b05f2;
   animation: lighting 5s infinite;
   -webkit-animation-play-state: paused;
@@ -191,7 +192,7 @@ div.player label {
 }
 .player-title {
   margin: 5px;
-  font-size: 18px;
+  font-size: 14px;
 }
 div.player div.controls {
   /* padding: 10px 0; */
