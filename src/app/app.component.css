@@ -16,7 +16,7 @@
 }
 
 #fullscreen {
-  background: #13004e;
+  background: inherit;
   height: 100%;
   width: 100%;
 }
@@ -29,7 +29,7 @@
 }
 
 ul.gallery {
-  padding: 20vh 0;
+  padding: 10vh 0;
   width: 100%;
   height: auto;
   text-align: center;

@@ -72,7 +72,7 @@ export class AppComponent implements OnInit {
       fullScreen.webkitRequestFullscreen();
 		} else if (fullScreen.msRequestFullscreen) {
       fullScreen.msRequestFullscreen();
-		}
+    }
   }
 
   track_select(track) {

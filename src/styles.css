@@ -7,6 +7,7 @@ body {
 
 /* Bootstrap button */
 button {
+  outline: none;
   display: inline-block;
   font-weight: 400;
   text-align: center;
@@ -28,4 +29,30 @@ button {
   -webkit-appearance: button;
   text-transform: none;
   cursor: pointer;
+}
+
+/* CSS3 Background Aurora Effect */
+.aurora-borealis {
+  background: linear-gradient(#05051f, #05051f, #97f7f3, #05051f, #05051f, #05051f, #76f6bd, #aaebc9, #05051f, #05051f, #69c1ff, #cb304f, #05051f, #05051f, #05051f, #05051f, #4a5b8f, #419f91, #05051f, #05051f, #3a4aa1, #db3b69, #05051f);
+  background-size: 1800% 1800%;
+  -webkit-animation: aurora-effect 180s ease;
+  -moz-animation: aurora-effect 180s ease;
+  animation: aurora-effect 180s ease;
+  animation-iteration-count: 1;
+}
+
+@-webkit-keyframes aurora-effect {
+  0%{background-position:18% 0%}
+  50%{background-position:83% 100%}
+  100%{background-position:18% 0%}
+}
+@-moz-keyframes aurora-effect {
+  0%{background-position:18% 0%}
+  50%{background-position:83% 100%}
+  100%{background-position:18% 0%}
+}
+@keyframes aurora-effect { 
+  0%{background-position:18% 0%}
+  50%{background-position:83% 100%}
+  100%{background-position:18% 0%}
 }

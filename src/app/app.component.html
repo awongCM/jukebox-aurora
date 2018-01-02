@@ -1,13 +1,14 @@
 <!-- TODOS -->
 <div class="menu-container">
-  <div class="menu-inline-block">
-    <h2>{{title}}</h2>
+  <h2>{{title}}</h2>
+  <div *ngIf="!hasValidToken()" class="menu-inline-block">
+    <!-- TODO - UI components for other music api services -->
+    <button (click)="login()">Log In</button>
   </div>
-  <div class="menu-inline-block">
-    <button *ngIf="!hasValidToken()" (click)="login()">Log In</button>
-    <button *ngIf="hasValidToken()" (click)="logout()">Log Out</button>
-    <button class="toggleBtn" *ngIf="hasValidToken()" (click)="toggle()">Toggle</button>
-    <button class="toggleBtn" *ngIf="hasValidToken()" (click)="fullscreen()">FullScreen</button>
+  <div *ngIf="hasValidToken()" class="menu-inline-block">
+    <button (click)="logout()">Log Out</button>
+    <button class="toggleBtn" (click)="toggle()">Toggle</button>
+    <button class="toggleBtn" (click)="fullscreen()">FullScreen</button>
   </div>
 </div>
 
