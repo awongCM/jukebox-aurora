@@ -91,6 +91,9 @@ export class SpotifyAPIService {
     this.accessToken = null;
   }
 
+  /**
+   * getData
+   */
   public getData(api_url) {
     const options = this.getOptions();
 
