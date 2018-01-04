@@ -10,7 +10,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
   - SoundCloud(sadly, its [not available](http://soundcloud.com/you/apps/new) for app registration yet)
 * Funkier/cooler jukebox CSS design/animation
 * CSS3 Background Animation
-* UI Components to sign in different public music web api services
+* ~~UI Components to sign in different public music web api services~~
 
 ## Development server
 
