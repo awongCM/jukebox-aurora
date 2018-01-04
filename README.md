@@ -5,7 +5,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 ## TODO Features
 * Integrate the following music web API services
   - ~~Spotify~~
-  - Google Music Play
+  - ~~Google Music Play~~
   - Itunes Music Search
   - SoundCloud(sadly, its [not available](http://soundcloud.com/you/apps/new) for app registration yet)
 * Funkier/cooler jukebox CSS design/animation
