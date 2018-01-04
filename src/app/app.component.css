@@ -9,6 +9,11 @@
   vertical-align: middle;
 }
 
+.menu-container .form-check-inline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .toggleBtn {
   border: 2px solid rgba(255, 255, 255, 0.3);
   background: transparent;

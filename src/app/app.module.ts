@@ -4,6 +4,7 @@ import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
 import { SpotifyAPIService } from './services/spotify-api.service';
+import { GooglePlayMusicAPIService } from './services/gp-music-api.service';
 
 
 @NgModule({
@@ -14,7 +15,7 @@ import { SpotifyAPIService } from './services/spotify-api.service';
     BrowserModule,
     HttpModule
   ],
-  providers: [SpotifyAPIService],
+  providers: [SpotifyAPIService, GooglePlayMusicAPIService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

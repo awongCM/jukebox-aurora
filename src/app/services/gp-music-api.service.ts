@@ -1,18 +1,13 @@
-// TODO - to implemetnt Google Music API services
-
 import { Injectable } from '@angular/core';
 import { Http, RequestOptions, Response, Headers } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 @Injectable()
 export class GooglePlayMusicAPIService {
-  client_id = '';
-  client_secret = '';
-  redirect_uri = '';
-  state_key = 'spotity_auth_state';
-
+  email = '';
+  password = '';
+  state_key = 'google_music_access_token';
   private accessToken: any = null;
-  private tokenType: string = null;
 
   constructor(private http: Http) { }
 
@@ -20,22 +15,13 @@ export class GooglePlayMusicAPIService {
    * checkValidAuthorization
    */
   public checkValidAuthorization(): void {
-    const hashParams = this.getHashParams(),
-          { access_token, token_type, state } = hashParams;
+    const storedAccessToken = localStorage.getItem(this.state_key);
 
-    const storedState = localStorage.getItem(this.state_key);
-
-    if (access_token && (state == null || state !== storedState)) {
-      alert('Authentication Error detected');
+    if (!storedAccessToken) {
+      console.log('Authentication Error Detected.');
     } else {
-      localStorage.removeItem(this.state_key);
-      if (access_token) {
-        // remove hash
-        window.location.hash = '';
-
-        this.accessToken = access_token;
-        this.tokenType = token_type;
-      }
+      console.log('Authentication Successful!');
+      this.accessToken = storedAccessToken;
     }
   }
 
@@ -47,49 +33,28 @@ export class GooglePlayMusicAPIService {
   }
 
   /**
-   * getHashParams
-   */
-  public getHashParams(): any {
-    const hashParams = {};
-    let e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
-    while ( e = r.exec(q)) {
-        hashParams[e[1]] = decodeURIComponent(e[2]);
-    }
-    return hashParams;
-  }
-
-  private generateRandomString(length): string {
-    let random_str = '';
-    const combinations = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < length; i++) {
-      random_str += combinations.charAt(Math.floor(Math.random() * combinations.length));
-    }
-    return random_str;
-  }
-
-  /**
    * requestAuthorization using implicit grant access only
    */
   public requestAuthorization(): void {
-    let authorizationTokenUrl = 'https://accounts.spotify.com/authorize';
+    let authorizationTokenUrl = 'http://api.dev.local:5000/api/login';
 
-    let state_value = this.generateRandomString(16);
-    localStorage.setItem(this.state_key, state_value);
+    const options = this.getOptions();
 
-    let query_params =  [ '?response_type=token', `client_id=${this.client_id}`,
-                          'scope=user-library-read', `redirect_uri=${this.redirect_uri}`,
-                          `state=${state_value}`
-                        ].join('&');
+    this.http.post(authorizationTokenUrl, options)
+      .map((res: Response) => res.json())
+      .subscribe(data => {
+        console.log('Google Authorization Tokens', data);
+        localStorage.setItem(this.state_key, data.accessToken);
+        window.location.reload();
+      });
 
-    window.location = authorizationTokenUrl + query_params;
   }
 
   /**
    * endAuthorizationRequest
    */
   public endAuthorizationRequest(): void {
+    localStorage.removeItem(this.state_key);
     this.accessToken = null;
   }
 
@@ -108,7 +73,7 @@ export class GooglePlayMusicAPIService {
    */
   private getOptions(): any {
     let headers = new Headers();
-    headers.append('Authorization', this.tokenType + ' ' + this.accessToken);
+    headers.append('Access-Control-Allow-Origin', '*');
     let options = new RequestOptions({headers: headers});
 
     return options;
@@ -118,7 +83,13 @@ export class GooglePlayMusicAPIService {
    * getUserTracks
    */
   public getUserTracks(): any {
-    return this.getData('https://api.spotify.com/v1/me/tracks/');
+    return this.getData('http://api.dev.local:5000/api/songs/');
   }
 
+  /**
+   * getStreamUrl
+   */
+  public getStreamUrl(id): any {
+    return this.getData(`http://api.dev.local:5000/api/songs/${id}`);
+  }
 }

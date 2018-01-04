@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SpotifyAPIService } from './services/spotify-api.service';
+import { GooglePlayMusicAPIService } from './services/gp-music-api.service';
+import { Track } from './services/jukebox-interface';
 
 @Component({
   selector: 'app-root',
@@ -8,10 +10,14 @@ import { SpotifyAPIService } from './services/spotify-api.service';
 })
 export class AppComponent implements OnInit {
   title = 'JukeBox Aurora App';
-  private tracks: any[];
+  tracks: Track[];
+
+  //checkbox properties
+  selected_radio_api_service = null;
+  radio_api_service_state_key = "selected_api_service";
 
   // jukebox properties
-  selected_track = null;
+  selected_track: Track = null;
   isPlaying = false;
   audio = null;
   disc = null;
@@ -32,29 +38,91 @@ export class AppComponent implements OnInit {
   private positionPercentage: number;
   private speedPercentage: number;
 
-  constructor(public spotifyAPI: SpotifyAPIService) {
+  constructor(public spotifyAPI: SpotifyAPIService, public gmusicAPI: GooglePlayMusicAPIService) {
     console.log('Hello Jukebox Aurora App initialised');
   }
 
   ngOnInit(): void {
-    this.spotifyAPI.checkValidAuthorization();
+    this.selected_radio_api_service = localStorage.getItem(this.radio_api_service_state_key);
 
-    if (this.hasValidToken()) {
-      this.spotifyAPI.getUserTracks().subscribe(data => {
-          console.log('data.items', data.items);
-          let tracks = data.items.map( (item) => item.track);
+    this.refreshTitle();
+
+    if (this.selected_radio_api_service === 'SPM') {
+      this.spotifyAPI.checkValidAuthorization();
+      if (this.hasValidToken()) {
+        this.spotifyAPI.getUserTracks().subscribe(data => {
+            console.log('data.items', data.items);
+
+            const tracks = data.items.map( (item) => {
+              let track: Track = {
+                album_artwork: item.track.album.images[1].url,
+                id: item.track.track_number,
+                title: item.track.name,
+                album: item.track.album.name,
+                artist: item.track.artists[0].name,
+                stream_url: item.track.preview_url
+              };
+              return track;
+            });
+            this.tracks = tracks;
+        });
+      }
+    } else {
+      this.gmusicAPI.checkValidAuthorization();
+      if (this.hasValidToken()) {
+        this.gmusicAPI.getUserTracks().subscribe(data => {
+          console.log('data.songs', data.songs);
+
+          const tracks = data.songs.map((song) => {
+            let track: Track = {
+              album_artwork: song.albumArtRef[0].url,
+              id: song.id,
+              title: song.title,
+              album: song.album,
+              artist: song.artist,
+              stream_url: song.stream_url
+            };
+            return track;
+          });
           this.tracks = tracks;
-      });
+        });
+      }
+    }
+  }
+
+  private refreshTitle(): void {
+    if (this.selected_radio_api_service === 'SPM') {
+      this.title = "Spotify Music Collection";
+    } else if (this.selected_radio_api_service === 'GPM') {
+      this.title = "Google Play Collection";
     }
   }
 
   login() {
-    this.spotifyAPI.requestAuthorization();
+    if (this.selected_radio_api_service === 'SPM') {
+      this.spotifyAPI.requestAuthorization();
+    } else {
+      this.gmusicAPI.requestAuthorization();
+    }
   }
 
   logout() {
-    this.spotifyAPI.endAuthorizationRequest();
+    if (this.selected_radio_api_service === 'SPM') {
+      this.spotifyAPI.endAuthorizationRequest();
+    } else {
+      this.gmusicAPI.endAuthorizationRequest();
+    }
+
+    //removed selected api service upon logout
+    localStorage.removeItem(this.radio_api_service_state_key);
     window.location.reload();
+  }
+
+  toggle_radio_api_server(value) {
+    this.selected_radio_api_service = value;
+
+    // store selected api service prior to logon
+    localStorage.setItem(this.radio_api_service_state_key, value);
   }
 
   toggle() {
@@ -64,6 +132,7 @@ export class AppComponent implements OnInit {
   fullscreen() {
     let fullScreen = <HTMLDivElement>document.getElementById('fullscreen');
 
+    // TODO - add interface with this
     if (fullScreen.requestFullscreen) {
       fullScreen.requestFullscreen();
 		} else if (fullScreen.mozRequestFullScreen) {
@@ -80,25 +149,40 @@ export class AppComponent implements OnInit {
     this.selected_track = track;
     this.isPlaying = false;
 
+    if (this.selected_radio_api_service === 'GPM') {
+      this.gmusicAPI.getStreamUrl(this.selected_track.id).subscribe(data => {
+        console.log("stream_url", data.stream_url);
+        this.selected_track.stream_url = data.stream_url;
+      });
+    }
+
     // reset webkit animations when switching tracks
     this.disc = document.getElementById('disc');
     console.log('disc ob', this.disc);
     this.disc.style.webkitAnimation = 'none';
     setTimeout(function() {
       this.disc.style.webkitAnimation = '';
-  }, 10);
+    }, 10);
   }
 
   display_album_artwork() {
-    return (this.selected_track !== null) ? this.selected_track.album.images[0].url : 'http://via.placeholder.com/250x250';
+    return this.display_template_data('album_artwork', 'http://via.placeholder.com/250x250');
   }
 
-  display_album_title() {
-    return (this.selected_track !== null) ? this.selected_track.name : 'No audio track is chosen';
+  display_track_title() {
+    return this.display_template_data('title', 'No audio track is chosen');
   }
 
   display_album_url() {
-    return (this.selected_track !== null) ? this.selected_track.preview_url : '';
+    return this.display_template_data('stream_url', '');
+  }
+
+  private display_template_data(data_prop, default_value) {
+    if (this.selected_track !== null && this.selected_track[data_prop] !== null) {
+      return this.selected_track[data_prop];
+    } else {
+      return default_value;
+    }
   }
 
   pause_play_track(event) {
@@ -173,10 +257,18 @@ export class AppComponent implements OnInit {
    * hasValidToken
    */
   public hasValidToken(): boolean {
-    if (this.spotifyAPI.isTokenValid()) {
-      return true;
+    if (this.selected_radio_api_service === 'SPM') {
+      if (this.spotifyAPI.isTokenValid()) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
-      return false;
+      if (this.gmusicAPI.isTokenValid()) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 }

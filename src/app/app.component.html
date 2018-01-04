@@ -3,9 +3,20 @@
   <h2>{{title}}</h2>
   <div *ngIf="!hasValidToken()" class="menu-inline-block">
     <!-- TODO - UI components for other music api services -->
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="api-radio-group" 
+          [checked]="selected_radio_api_service === SPM" value="SPM" (change)="toggle_radio_api_server('SPM')">
+      <label class="form-check-label" for="api-radio-group">Spotify</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="api-radio-group" 
+          [checked]="selected_radio_api_service === GPM" value="GPM" (change)="toggle_radio_api_server('GPM')">
+      <label class="form-check-label" for="api-radio-group">Google Play</label>
+    </div>
     <button (click)="login()">Log In</button>
   </div>
   <div *ngIf="hasValidToken()" class="menu-inline-block">
+    <span></span>
     <button (click)="logout()">Log Out</button>
     <button class="toggleBtn" (click)="toggle()">Toggle</button>
     <button class="toggleBtn" (click)="fullscreen()">FullScreen</button>
@@ -16,26 +27,27 @@
 <div *ngIf="hasValidToken()" id="fullscreen">
     <div class="container">
         <ul (mouseover)="scroll_tracks($event)" class="gallery centerised" id="gallery">
+            <!-- Track metadata is now handled by Track Interface -->
             <li *ngFor="let track of tracks" (click)="track_select(track)">
-              <img src="{{track.album.images[1].url}}" alt="{{track.album.name}}">
-              <p>ID: {{track.track_number}}</p>
-              <p>Title: {{track.name}}</p>
-              <p>Album: {{track.album.name}}</p>
-              <span>{{track.artists[0].name}}</span>
-              <audio controls muted src="{{track.preview_url}}"></audio>    
+              <img src="{{track.album_artwork}}" alt="{{track.album}}">
+              <p>ID: {{track.id}}</p>
+              <p>Title: {{track.title}}</p>
+              <p>Album: {{track.album}}</p>
+              <span>{{track.artist}}</span>
+              <audio controls muted src="{{track.stream_url}}"></audio>
             </li>
         </ul>
     </div>
     
     <!-- JukeBox -->
     <div class="player" [ngClass]="isPlaying ? 'playing':''" [ngStyle]="{ 'animation-play-state': pause_play_state() }">
-      <div class="disc" id="disc" [ngStyle]="{ 'background-image': 'url(' + display_album_artwork() + ')', 'animation-play-state': pause_play_state()}" ></div>
+      <div class="disc" id="disc" [ngStyle]="{'background-image': 'url(' + display_album_artwork() + ')', 'animation-play-state': pause_play_state()}" ></div>
       <label>Currently Playing</label>
-      <h2 class="player-title" id="player-title">{{display_album_title()}}<i class="fa fa-music"></i><span></span></h2>
+      <h2 class="player-title" id="player-title"><i class="fa fa-music"></i> {{display_track_title()}} <i class="fa fa-music"></i><span></span></h2>
       <div class="controls">
         <a href="#" class="play" (click)="pause_play_track($event)"><i class="fa" [ngClass]="isPlaying ? 'fa-pause' : 'fa-play'"></i></a>
       </div>
       <!-- TODO: to implement full music track playback https://beta.developer.spotify.com/documentation/web-playback-sdk/quick-start/  -->
-      <audio id="player_audio" *ngIf="selected_track" src="{{display_album_url()}}" (ended)="reset_play_state()" style="display: none;"></audio> 
+      <audio id="player_audio" controls *ngIf="selected_track" src="{{selected_track.stream_url}}" (ended)="reset_play_state()"></audio> 
     </div>
 </div>
