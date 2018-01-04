@@ -7,6 +7,7 @@ var app        = express();
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var PlayMusic  = require('playmusic');
+var config = require('config-yml');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -21,9 +22,9 @@ var router = express.Router();
 var pm = new PlayMusic();
 
 // GOOGLE ACCOUNT SETTINGS
-var EMAIL = "",
-    PASSWORD = "";
-    MASTER_TOKEN = null; 
+var EMAIL = config.google_music.email,
+    PASSWORD = config.google_music.password;
+var MASTER_TOKEN = null; 
 
 router.get('/', function(req, res) {
     res.json({ message: 'Google Music API is live!' });
