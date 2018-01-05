@@ -1,8 +1,17 @@
 # Jukebox Aurora
+Jukebox Music Playing App written in Angular 4/5.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.5.5.
+My little fun pet project to play and listen all of my music collection from my favourite music cloud API services, that comes with a colourful jukebox.
 
-## TODO Features
+![Animated Jukebox ](jukebox-animated.gif)
+
+Well..  that's the start of it.  
+
+I don't acquire such design aethistics... But at least that's what got me inspiration to build this.
+
+As you pick and select any music tracks, the jukebox not only play them but it will also animate aurora lights in radiant colours.
+
+## Features (and TodoS)
 * Integrate the following music web API services
   - ~~Spotify~~
   - ~~Google Music Play~~
@@ -11,27 +20,10 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 * Funkier/cooler jukebox CSS design/animation
 * CSS3 Background Animation
 * ~~UI Components to sign in different public music web api services~~
+* Search and filter music tracks/abums/playlists
 
-## Development server
+## Version
+* 1.0.0 - Radio buttons to switch different music cloud api services; Togglable 3D Carousel to navigate music tracks; Fullscreen mode available; 
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+## License
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details
