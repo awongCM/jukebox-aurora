@@ -11,7 +11,7 @@ I don't acquire such design aethistics... But at least that's what got me inspir
 
 As you pick and select any music tracks, the jukebox not only play them but it will also animate aurora lights in radiant colours.
 
-## Features (and TodoS)
+## Features (and TODOS)
 * Integrate the following music web API services
   - ~~Spotify~~
   - ~~Google Music Play~~
