@@ -1,8 +1,7 @@
-//TODO - need to sort this console errors when starting error
-export interface DocumentInterface {
-  requestFullscreen: any;
-  mozRequestFullScreen: any;
-  webkitRequestFullscreen: any;
-  msRequestFullscreen: any;
+export interface DocumentInterface extends HTMLElement {
+  requestFullscreen?(): boolean;
+  mozRequestFullScreen?(): boolean;
+  webkitRequestFullscreen?(): boolean;
+  msRequestFullscreen?(): boolean;
 }
 

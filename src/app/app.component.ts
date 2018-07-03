@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SpotifyAPIService } from './services/spotify-api.service';
 import { GooglePlayMusicAPIService } from './services/gp-music-api.service';
 import { Track } from './services/jukebox-interface';
+import { DocumentInterface } from './browsers/document-interface';
 
 @Component({
   selector: 'app-root',
@@ -130,7 +131,7 @@ export class AppComponent implements OnInit {
   }
 
   fullscreen() {
-    let fullScreen = <HTMLDivElement>document.getElementById('fullscreen');
+    const fullScreen = <DocumentInterface>document.getElementById('fullscreen');
 
     // TODO - add interface with this
     if (fullScreen.requestFullscreen) {
