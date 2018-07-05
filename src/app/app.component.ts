@@ -133,7 +133,6 @@ export class AppComponent implements OnInit {
   fullscreen() {
     const fullScreen = <DocumentInterface>document.getElementById('fullscreen');
 
-    // TODO - add interface with this
     if (fullScreen.requestFullscreen) {
       fullScreen.requestFullscreen();
 		} else if (fullScreen.mozRequestFullScreen) {
@@ -216,30 +215,23 @@ export class AppComponent implements OnInit {
     this.isPlaying = false;
   }
 
-  // TODOS
+  /**
+  |--------------------------------------------------
+  | Scroll track carousel to the left/right
+  |--------------------------------------------------
+  */
   scroll_tracks(event) {
     this.pageX = event.clientX || event.screenX;
     this.screenWidth = window.innerWidth;
     this.currentPosPercentage = (this.screenWidth - this.pageX) / this.screenWidth;
 
     if (this.currentPosPercentage > this.THRESHOLD) {
-      // speed = calculateSpeed(LEFT, currentPosPercentage);
-      // setScroll(LEFT,speed);
       this.setScroll(this.LEFT, this.DEFAULT_SPEED);
     } else if (this.currentPosPercentage < (1 - this.THRESHOLD)) {
-      // speed = calculateSpeed(RIGHT, currentPosPercentage);
-      // setScroll(RIGHT,speed);
       this.setScroll(this.RIGHT, this.DEFAULT_SPEED);
     } else {
       this.endScroll();
     }
-  }
-
-  private calculateSpeed(direction, ratio) {
-    this.positionPercentage = direction === this.LEFT ? ratio : 1 - ratio;
-    this.speedPercentage = (this.positionPercentage - this.THRESHOLD) / (1 - this.THRESHOLD);
-
-    return this.speedPercentage * this.MAX_SPEED;
   }
 
   private setScroll(direction, speed) {
