@@ -11,6 +11,10 @@
     "e2e": "ng e2e"
   },
   "private": true,
+  "engines": {
+    "node": "8.9",
+    "npm": "5.6"
+  },
   "dependencies": {
     "@angular/animations": "^5.0.0",
     "@angular/common": "^5.0.0",
