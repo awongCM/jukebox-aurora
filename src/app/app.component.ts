@@ -24,9 +24,9 @@ export class AppComponent implements OnInit {
   disc = null;
 
   // gallery properties
-  readonly THRESHOLD: Number = 0.6;
-  readonly MAX_SPEED: Number = 25;
-  readonly DEFAULT_SPEED: Number = 7;
+  readonly THRESHOLD: number = 0.6;
+  readonly MAX_SPEED: number = 25;
+  readonly DEFAULT_SPEED: number = 7;
   readonly LEFT: String = 'left';
   readonly RIGHT: String = 'right';
 

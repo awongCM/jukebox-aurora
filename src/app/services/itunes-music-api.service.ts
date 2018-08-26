@@ -83,7 +83,7 @@ export class ItunesMusicSearchAPIService {
                           `state=${state_value}`
                         ].join('&');
 
-    window.location = authorizationTokenUrl + query_params;
+    window.location.href = authorizationTokenUrl + query_params;
   }
 
   /**
