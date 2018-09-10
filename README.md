@@ -19,6 +19,7 @@ As you pick and select any music tracks, the jukebox not only play them but it w
   - SoundCloud(sadly, its [not available](http://soundcloud.com/you/apps/new) for app registration yet)
 * Funkier/cooler jukebox CSS design/animation
 * CSS3 Background Animation
+* Add security for storing API keys
 * ~~UI Components to sign in different public music web api services~~
 * Search and filter music tracks/abums/playlists
 
