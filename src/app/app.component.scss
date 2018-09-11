@@ -1,4 +1,9 @@
 /* TODOS - to add more ideas for the music playlist interface*/
+h1 {
+  letter-spacing: 2px;
+  font-size: 42px;
+  color: #a2a1a1;
+}
 
 .menu-container {
   height: 100px;
@@ -7,7 +12,13 @@
 .menu-container .menu-inline-block{
   display: inline-block;
   vertical-align: middle;
+
+  label {
+    font-size: 18px;
+  }
 }
+
+
 
 .menu-container .form-check-inline {
   display: inline-block;

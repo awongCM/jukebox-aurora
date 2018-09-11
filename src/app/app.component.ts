@@ -10,7 +10,7 @@ import { DocumentInterface } from './browsers/document-interface';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'JukeBox Aurora App';
+  title = 'Welcome to my JukeBox Aurora App';
   tracks: Track[];
 
   //checkbox properties
