@@ -3,13 +3,10 @@ import { SpotifyAPIService } from './services/spotify-api.service';
 import { GooglePlayMusicAPIService } from './services/gp-music-api.service';
 import { Track } from './services/jukebox-interface';
 import { DocumentInterface } from './browsers/document-interface';
-import { Window } from './browsers/window-interface';
+import { PlugnPlayWindow } from './browsers/window-interface';
 import { ScriptService } from './services/script.service';
 
-
-declare global {
-  interface Window { onSpotifyWebPlaybackSDKReady(): any; }
-}
+declare let window: PlugnPlayWindow;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -54,7 +51,7 @@ export class AppComponent implements OnInit {
   }
 
   private initiateWebPlayback(): void {
-      (window as Window).onSpotifyWebPlaybackSDKReady = () => {
+       window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '[My Spotify Web API access token]';
         console.log(token);
       };

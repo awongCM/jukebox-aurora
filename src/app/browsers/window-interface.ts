@@ -1,3 +1,3 @@
-export interface Window {
-  onSpotifyWebPlaybackSDKReady(): any;
-}
+export interface PlugnPlayWindow extends Window {
+    onSpotifyWebPlaybackSDKReady(): any;
+  }
