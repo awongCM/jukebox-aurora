@@ -22,8 +22,10 @@ As you pick and select any music tracks, the jukebox not only play them but it w
 * Add security for storing API keys
 * ~~UI Components to sign in different public music web api services~~
 * Search and filter music tracks/abums/playlists
+* Component-layer architecture for refactoring
 
 ## Version
+
 * 1.0.0 - Radio buttons to switch different music cloud api services; Togglable 3D Carousel to navigate music tracks; Fullscreen mode available; 
 
 ## License
