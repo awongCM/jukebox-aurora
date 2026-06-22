@@ -1,32 +1,68 @@
 # Jukebox Aurora
-Jukebox Music Playing App written in Angular 4/5.
 
-My little fun pet project to play and listen all of my music collection from my favourite music cloud API services, that comes with a colourful jukebox.
+Jukebox Music Playing App — browse your music collection from cloud APIs on a colourful, animated jukebox with aurora lighting.
 
-![Animated Jukebox ](jukebox-animated.gif)
+![Animated Jukebox](jukebox-animated.gif)
 
-Well..  that's the start of it.  
+> **Modernization in progress.** This app originated as an Angular 4/5 pet project (~2017–2018). Phase 1 (June 2025) brought the toolchain up to current standards. See **[MODERNIZATION_LOG.md](MODERNIZATION_LOG.md)** for the full history of why and how we are modernizing.
 
-I don't acquire such design aethistics... But at least that's what got me inspiration to build this.
+## Quick start
 
-As you pick and select any music tracks, the jukebox not only play them but it will also animate aurora lights in radiant colours.
+**Requirements:** Node.js 20 or later.
 
-## Features (and TODOS)
-* Integrate the following music web API services
-  - ~~Spotify~~
-  - ~~Google Music Play~~
-  - Itunes Music Search
-  - SoundCloud(sadly, its [not available](http://soundcloud.com/you/apps/new) for app registration yet)
-* Funkier/cooler jukebox CSS design/animation
-* CSS3 Background Animation
-* Add security for storing API keys
-* ~~UI Components to sign in different public music web api services~~
-* Search and filter music tracks/abums/playlists
-* Component-layer architecture for refactoring
+```bash
+npm install
+cp src/environments/environment.example.ts src/environments/environment.ts
+# Add your Spotify client ID to environment.ts
 
-## Version
+npm start
+```
 
-* 1.0.0 - Radio buttons to switch different music cloud api services; Togglable 3D Carousel to navigate music tracks; Fullscreen mode available; 
+Open [http://localhost:4200](http://localhost:4200).
+
+### Optional: legacy Google Play Music proxy
+
+Google Play Music was discontinued in 2020. The Express backend remains for reference only.
+
+```bash
+npm run server   # port 5000 — requires config.yml with Google credentials
+```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Dev server with proxy config |
+| `npm run build` | Production build → `dist/jukebox-aurora` |
+| `npm test` | Karma/Jasmine unit tests |
+| `npm run e2e` | Playwright end-to-end tests |
+| `npm run lint` | ESLint |
+| `npm run server` | Legacy Express Google Music API proxy |
+
+## Features
+
+- Spotify library browsing (preview playback; full playback planned Phase 2)
+- Google Play Music integration via local proxy (deprecated provider)
+- 3D perspective carousel with hover-to-scroll
+- Animated jukebox player with aurora border lighting
+- Fullscreen mode
+- Provider switching (Spotify / Google Play)
+
+## Planned (see MODERNIZATION_LOG.md)
+
+- Spotify PKCE auth + Web Playback SDK
+- iTunes / Apple Music search
+- Component architecture refactor
+- Secure backend token storage
+- Deployment to Render
+
+## Version history
+
+| Version | Notes |
+|---------|-------|
+| **1.1.0** | Phase 1 modernization — Angular 19, HttpClient, ESLint, Playwright |
+| **1.0.0** | Original release — Angular 5, carousel, radio provider switching, fullscreen |
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details
+
+MIT — see [LICENSE](LICENSE).

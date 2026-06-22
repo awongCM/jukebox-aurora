@@ -23,7 +23,7 @@ const pm = new PlayMusic();
 // GOOGLE ACCOUNT SETTINGS
 const EMAIL = config.google_music.email,
   PASSWORD = config.google_music.password;
-const MASTER_TOKEN = null;
+let masterToken = null;
 
 router.get("/", function(req, res) {
   res.json({ message: "Google Music API is live!" });
@@ -39,7 +39,7 @@ router.use(function(req, res, next) {
 router.route("/login").post(function(req, res) {
   pm.login({ email: EMAIL, password: PASSWORD }, function(err, credentials) {
     if (err) res.send({ error: err });
-    MASTER_TOKEN = credentials.masterToken;
+    masterToken = credentials.masterToken;
 
     pm.init(
       {
@@ -50,7 +50,7 @@ router.route("/login").post(function(req, res) {
         if (err) res.send({ error: err });
         res.json({
           message: "Google Account Logged In!",
-          accessToken: MASTER_TOKEN
+          accessToken: masterToken
         });
       }
     );
@@ -59,8 +59,8 @@ router.route("/login").post(function(req, res) {
 
 router.route("/logout").post(function(req, res) {
   //for now just send a blank accessToken to client
-  MASTER_TOKEN = null;
-  res.json({ message: "Google Account Logged Out", accessToken: MASTER_TOKEN });
+  masterToken = null;
+  res.json({ message: "Google Account Logged Out", accessToken: masterToken });
 });
 
 router.route("/songs").get(function(req, res) {

@@ -1,95 +1,80 @@
-import { Injectable } from '@angular/core';
-import { Http, RequestOptions, Response, Headers } from '@angular/http';
-import 'rxjs/add/operator/map';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class GooglePlayMusicAPIService {
-  email = '';
-  password = '';
-  state_key = 'google_music_access_token';
-  private accessToken: any = null;
+  private readonly http = inject(HttpClient);
 
-  constructor(private http: Http) { }
+  readonly stateKey = 'google_music_access_token';
 
-  /**
-   * checkValidAuthorization
-   */
-  public checkValidAuthorization(): void {
-    const storedAccessToken = localStorage.getItem(this.state_key);
+  private accessToken: string | null = null;
 
-    if (!storedAccessToken) {
-      console.log('Authentication Error Detected.');
-    } else {
-      console.log('Authentication Successful!');
-      this.accessToken = storedAccessToken;
-    }
+  private get apiBaseUrl(): string {
+    return environment.googleMusicApi.baseUrl;
   }
 
-  /**
-   * isTokenValid
-   */
-  public isTokenValid(): boolean {
+  checkValidAuthorization(): void {
+    const storedAccessToken = localStorage.getItem(this.stateKey);
+    if (!storedAccessToken) {
+      console.log('Authentication Error Detected.');
+      return;
+    }
+    console.log('Authentication Successful!');
+    this.accessToken = storedAccessToken;
+  }
+
+  isTokenValid(): boolean {
     return this.accessToken !== null;
   }
 
-  /**
-   * requestAuthorization using implicit grant access only
-   */
-  public requestAuthorization(): void {
-    let authorizationTokenUrl = 'http://api.dev.local:5000/api/login';
-
-    const options = this.getOptions();
-
-    this.http.post(authorizationTokenUrl, options)
-      .map((res: Response) => res.json())
-      .subscribe(data => {
-        console.log('Google Authorization Tokens', data);
-        localStorage.setItem(this.state_key, data.accessToken);
-        window.location.reload();
-      });
-
+  requestAuthorization(): void {
+    this.http
+      .post<GoogleLoginResponse>(`${this.apiBaseUrl}/login`, {})
+      .pipe(
+        tap((data) => {
+          console.log('Google Authorization Tokens', data);
+          localStorage.setItem(this.stateKey, data.accessToken);
+          window.location.reload();
+        }),
+      )
+      .subscribe();
   }
 
-  /**
-   * endAuthorizationRequest
-   */
-  public endAuthorizationRequest(): void {
-    localStorage.removeItem(this.state_key);
+  endAuthorizationRequest(): void {
+    localStorage.removeItem(this.stateKey);
     this.accessToken = null;
   }
 
-  /**
-   * getData
-   */
-  public getData(api_url) {
-    const options = this.getOptions();
-
-    return this.http.get(api_url, options)
-      .map((res: Response) => res.json());
+  getData<T>(apiUrl: string): Observable<T> {
+    return this.http.get<T>(apiUrl);
   }
 
-  /**
-   * getOptions
-   */
-  private getOptions(): any {
-    let headers = new Headers();
-    headers.append('Access-Control-Allow-Origin', '*');
-    let options = new RequestOptions({headers: headers});
-
-    return options;
+  getUserTracks(): Observable<GoogleSongsResponse> {
+    return this.getData<GoogleSongsResponse>(`${this.apiBaseUrl}/songs/`);
   }
 
-  /**
-   * getUserTracks
-   */
-  public getUserTracks(): any {
-    return this.getData('http://api.dev.local:5000/api/songs/');
+  getStreamUrl(id: string): Observable<GoogleStreamResponse> {
+    return this.getData<GoogleStreamResponse>(`${this.apiBaseUrl}/songs/${id}`);
   }
+}
 
-  /**
-   * getStreamUrl
-   */
-  public getStreamUrl(id): any {
-    return this.getData(`http://api.dev.local:5000/api/songs/${id}`);
-  }
+interface GoogleLoginResponse {
+  accessToken: string;
+}
+
+interface GoogleSongsResponse {
+  songs: {
+    id: string;
+    title: string;
+    album: string;
+    artist: string;
+    albumArtRef: { url: string }[];
+    stream_url?: string;
+  }[];
+}
+
+interface GoogleStreamResponse {
+  stream_url: string;
 }

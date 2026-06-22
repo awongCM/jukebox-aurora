@@ -1,127 +1,117 @@
-import { Injectable } from "@angular/core";
-import { Http, RequestOptions, Response, Headers } from "@angular/http";
-import "rxjs/add/operator/map";
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class SpotifyAPIService {
-  client_id = "976b920abb9946b987f1dfe7e95c1942";
-  client_secret = "049a3cf08f10408183111691d56fd6c0";
-  redirect_uri = "http://localhost:4200";
-  state_key = "spotity_auth_state";
+  private readonly http = inject(HttpClient);
 
-  private accessToken: any = null;
-  private tokenType: string = null;
+  readonly redirectUri = environment.spotify.redirectUri;
+  readonly stateKey = 'spotify_auth_state';
 
-  constructor(private http: Http) {}
+  private accessToken: string | null = null;
+  private tokenType: string | null = null;
 
-  /**
-   * checkValidAuthorization
-   */
-  public checkValidAuthorization(): void {
-    const hashParams = this.getHashParams(),
-      { access_token, token_type, state } = hashParams;
+  private get clientId(): string {
+    return environment.spotify.clientId;
+  }
 
-    const storedState = localStorage.getItem(this.state_key);
+  checkValidAuthorization(): void {
+    const hashParams = this.getHashParams();
+    const { access_token, token_type, state } = hashParams;
+    const storedState = localStorage.getItem(this.stateKey);
 
     if (access_token && (state == null || state !== storedState)) {
-      alert("Authentication Error detected");
-    } else {
-      localStorage.removeItem(this.state_key);
-      if (access_token) {
-        // remove hash
-        window.location.hash = "";
+      alert('Authentication Error detected');
+      return;
+    }
 
-        this.accessToken = access_token;
-        this.tokenType = token_type;
-      }
+    localStorage.removeItem(this.stateKey);
+    if (access_token) {
+      window.location.hash = '';
+      this.accessToken = access_token;
+      this.tokenType = token_type ?? 'Bearer';
     }
   }
 
-  /**
-   * isTokenValid
-   */
-  public isTokenValid(): boolean {
+  isTokenValid(): boolean {
     return this.accessToken !== null;
   }
 
-  /**
-   * getHashParams
-   */
-  public getHashParams(): any {
-    const hashParams = {};
-    let e,
-      r = /([^&;=]+)=?([^&;]*)/g,
-      q = window.location.hash.substring(1);
-    while ((e = r.exec(q))) {
-      hashParams[e[1]] = decodeURIComponent(e[2]);
+  getHashParams(): Record<string, string> {
+    const hashParams: Record<string, string> = {};
+    const pattern = /([^&;=]+)=?([^&;]*)/g;
+    const query = window.location.hash.substring(1);
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(query)) !== null) {
+      hashParams[match[1]] = decodeURIComponent(match[2]);
     }
     return hashParams;
   }
 
-  private generateRandomString(length): string {
-    let random_str = "";
-    const combinations =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < length; i++) {
-      random_str += combinations.charAt(
-        Math.floor(Math.random() * combinations.length)
-      );
+  requestAuthorization(): void {
+    if (!this.clientId) {
+      alert('Spotify client ID is not configured. See environment.example.ts.');
+      return;
     }
-    return random_str;
+
+    const stateValue = this.generateRandomString(16);
+    localStorage.setItem(this.stateKey, stateValue);
+
+    const queryParams = [
+      '?response_type=token',
+      `client_id=${encodeURIComponent(this.clientId)}`,
+      'scope=user-library-read',
+      `redirect_uri=${encodeURIComponent(this.redirectUri)}`,
+      `state=${encodeURIComponent(stateValue)}`,
+    ].join('&');
+
+    window.location.href = `https://accounts.spotify.com/authorize${queryParams}`;
   }
 
-  /**
-   * requestAuthorization using implicit grant access only
-   */
-  public requestAuthorization(): void {
-    let authorizationTokenUrl = "https://accounts.spotify.com/authorize";
-
-    let state_value = this.generateRandomString(16);
-    localStorage.setItem(this.state_key, state_value);
-
-    let query_params = [
-      "?response_type=token",
-      `client_id=${this.client_id}`,
-      "scope=user-library-read",
-      `redirect_uri=${this.redirect_uri}`,
-      `state=${state_value}`
-    ].join("&");
-
-    window.location.href = authorizationTokenUrl + query_params;
-  }
-
-  /**
-   * endAuthorizationRequest
-   */
-  public endAuthorizationRequest(): void {
+  endAuthorizationRequest(): void {
     this.accessToken = null;
+    this.tokenType = null;
   }
 
-  /**
-   * getData
-   */
-  public getData(api_url) {
-    const options = this.getOptions();
-
-    return this.http.get(api_url, options).map((res: Response) => res.json());
+  getData<T>(apiUrl: string): Observable<T> {
+    return this.http.get<T>(apiUrl, { headers: this.getHeaders() });
   }
 
-  /**
-   * getOptions
-   */
-  private getOptions(): any {
-    let headers = new Headers();
-    headers.append("Authorization", this.tokenType + " " + this.accessToken);
-    let options = new RequestOptions({ headers: headers });
-
-    return options;
+  getUserTracks(): Observable<SpotifySavedTracksResponse> {
+    return this.getData<SpotifySavedTracksResponse>('https://api.spotify.com/v1/me/tracks/');
   }
 
-  /**
-   * getUserTracks
-   */
-  public getUserTracks(): any {
-    return this.getData("https://api.spotify.com/v1/me/tracks/");
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `${this.tokenType} ${this.accessToken}`,
+    });
   }
+
+  private generateRandomString(length: number): string {
+    const combinations =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += combinations.charAt(Math.floor(Math.random() * combinations.length));
+    }
+    return result;
+  }
+}
+
+export interface SpotifySavedTracksResponse {
+  items: {
+    track: {
+      id: string;
+      name: string;
+      preview_url: string | null;
+      track_number: number;
+      album: {
+        name: string;
+        images: { url: string }[];
+      };
+      artists: { name: string }[];
+    };
+  }[];
 }
