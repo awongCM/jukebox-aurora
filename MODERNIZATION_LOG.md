@@ -135,6 +135,13 @@ npm run build      # Production build → dist/jukebox-aurora
 
 ## Changelog
 
+### 2025-06-22 — Spotify PKCE auth fix
+
+- Migrated Spotify login from deprecated implicit grant (`response_type=token`) to **Authorization Code + PKCE**
+- Changed redirect URI from `http://localhost:4200` to **`http://127.0.0.1:4200`** (Spotify security requirement)
+- Removed broken `proxy.config.json` that proxied all traffic to `accounts.spotify.com`
+- Dev server now binds to `127.0.0.1` via `ng serve --host 127.0.0.1`
+
 ### 2025-06-22 — Phase 1 foundation
 
 - Migrated Angular 5 → 19, Node 8 → 20+, TypeScript 2.4 → 5.7

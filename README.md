@@ -18,7 +18,15 @@ cp src/environments/environment.example.ts src/environments/environment.ts
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200).
+Open [http://127.0.0.1:4200](http://127.0.0.1:4200) — use this address, not `localhost` (Spotify requires loopback IP for local redirects).
+
+### Spotify developer setup
+
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → your app → **Settings**.
+2. Under **Redirect URIs**, add exactly: `http://127.0.0.1:4200`
+3. Remove `http://localhost:4200` if present — Spotify no longer accepts plain `localhost` for new apps.
+4. Copy your **Client ID** into `src/environments/environment.ts`.
+5. Select **Spotify** on the login screen, click **Log In**, approve access — you should return to the jukebox app.
 
 ### Optional: legacy Google Play Music proxy
 

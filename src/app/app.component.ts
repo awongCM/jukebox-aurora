@@ -61,19 +61,11 @@ export class AppComponent implements OnInit {
     this.refreshTitle();
 
     if (this.selected_radio_api_service === 'SPM') {
-      this.spotifyAPI.checkValidAuthorization();
-      if (this.hasValidToken()) {
-        this.spotifyAPI.getUserTracks().subscribe((data) => {
-          this.tracks = data.items.map((item) => ({
-            album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
-            id: item.track.id,
-            title: item.track.name,
-            album: item.track.album.name,
-            artist: item.track.artists[0]?.name ?? 'Unknown artist',
-            stream_url: item.track.preview_url ?? '',
-          }));
-        });
-      }
+      this.spotifyAPI.initializeAuth().subscribe((authenticated) => {
+        if (authenticated) {
+          this.loadSpotifyTracks();
+        }
+      });
     } else if (this.selected_radio_api_service === 'GPM') {
       this.gmusicAPI.checkValidAuthorization();
       if (this.hasValidToken()) {
@@ -101,10 +93,23 @@ export class AppComponent implements OnInit {
 
   login(): void {
     if (this.selected_radio_api_service === 'SPM') {
-      this.spotifyAPI.requestAuthorization();
+      void this.spotifyAPI.requestAuthorization();
     } else {
       this.gmusicAPI.requestAuthorization();
     }
+  }
+
+  private loadSpotifyTracks(): void {
+    this.spotifyAPI.getUserTracks().subscribe((data) => {
+      this.tracks = data.items.map((item) => ({
+        album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
+        id: item.track.id,
+        title: item.track.name,
+        album: item.track.album.name,
+        artist: item.track.artists[0]?.name ?? 'Unknown artist',
+        stream_url: item.track.preview_url ?? '',
+      }));
+    });
   }
 
   logout(): void {

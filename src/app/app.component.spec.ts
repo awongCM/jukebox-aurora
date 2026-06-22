@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { ScriptService } from './services/script.service';
+import { SpotifyAPIService } from './services/spotify-api.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -12,6 +14,16 @@ describe('AppComponent', () => {
         {
           provide: ScriptService,
           useValue: { loadScript: () => Promise.resolve({ loaded: true }) },
+        },
+        {
+          provide: SpotifyAPIService,
+          useValue: {
+            initializeAuth: () => of(false),
+            isTokenValid: () => false,
+            requestAuthorization: () => Promise.resolve(),
+            endAuthorizationRequest: () => undefined,
+            getUserTracks: () => of({ items: [] }),
+          },
         },
       ],
     }).compileComponents();
