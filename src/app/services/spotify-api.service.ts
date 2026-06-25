@@ -84,7 +84,7 @@ export class SpotifyAPIService {
 
   async requestAuthorization(): Promise<void> {
     if (!this.clientId) {
-      alert('Spotify client ID is not configured. See environment.example.ts.');
+      alert('Spotify client ID is not configured. Set SPOTIFY_CLIENT_ID in GitHub Secrets/Variables (CI) or in a local .env file.');
       return;
     }
 

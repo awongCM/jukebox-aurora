@@ -1,13 +1,15 @@
 /**
- * Template for local development — safe to commit (no real credentials).
- * Copy to environment.ts (gitignored) and add your Spotify client ID locally.
+ * Reference template — values are injected at build time.
  *
- * @see MODERNIZATION_LOG.md — "Environment-based configuration"
+ * - CI: GitHub Actions Secrets/Variables → scripts/generate-environment.js
+ * - Local: copy .env.example to .env and run npm start
+ *
+ * @see README.md — "Configuration (GitHub Secrets & Variables)"
  */
 export const environment = {
   production: false,
   spotify: {
-    clientId: 'your-spotify-client-id',
+    clientId: '',
     redirectUri: 'http://127.0.0.1:4200',
   },
   googleMusicApi: {

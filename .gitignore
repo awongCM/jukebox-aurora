@@ -42,7 +42,8 @@ testem.log
 /blob-report/
 /playwright/.cache/
 
-# local environment config (copy from environment.example.ts — never commit secrets)
+# local environment config (generated — never commit secrets)
+.env
 src/environments/environment.ts
 
 # System Files

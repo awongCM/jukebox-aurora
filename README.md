@@ -12,25 +12,56 @@ Jukebox Music Playing App — browse your music collection from cloud APIs on a 
 
 ```bash
 npm install
-cp src/environments/environment.example.ts src/environments/environment.ts
-# Edit environment.ts locally with your Spotify client ID — this file is gitignored
+cp .env.example .env
+# Add SPOTIFY_CLIENT_ID to .env (see Configuration below)
 
 npm start
 ```
 
 Open [http://127.0.0.1:4200](http://127.0.0.1:4200) — use this address, not `localhost` (Spotify requires loopback IP for local redirects).
 
+`npm start` runs `scripts/generate-environment.js`, which creates a gitignored `src/environments/environment.ts` from your `.env` file.
+
+## Configuration (GitHub Secrets & Variables)
+
+Credentials are **not stored in git**. Use [GitHub Secrets and variables](https://docs.github.com/en/actions/security-for-github-actions/about-secrets-and-variables) for CI, and a local `.env` file for development on your MacBook.
+
+> GitHub Secrets are available to **GitHub Actions** — they are not pushed to your laptop automatically. For local `npm start`, mirror the same values in `.env` (gitignored).
+
+### 1. Add to GitHub (repo → Settings → Secrets and variables → Actions)
+
+| Name | Type | Example | Required |
+|------|------|---------|----------|
+| `SPOTIFY_CLIENT_ID` | **Secret** | `976b920abb9946b987f1dfe7e95c1942` | Yes (for Spotify login) |
+| `SPOTIFY_REDIRECT_URI` | **Variable** | `http://127.0.0.1:4200` | Recommended |
+| `GOOGLE_MUSIC_API_BASE_URL` | **Variable** | `http://localhost:5000/api` | Optional |
+
+See GitHub’s guide: [Storing your secrets safely](https://docs.github.com/en/get-started/learning-to-code/storing-your-secrets-safely).
+
+### 2. Local development (`.env`)
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```env
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:4200
+```
+
+Then run `npm start` (or `npm run env:generate` manually).
+
+### 3. Spotify Developer Dashboard
+
+1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → your app → **Settings**
+2. Add Redirect URI: `http://127.0.0.1:4200`
+3. Use the same Client ID in GitHub Secret **and** local `.env`
+
 ### Cursor Cloud Agents
 
-Cloud environment config is committed at [`.cursor/environment.json`](.cursor/environment.json). See [AGENTS.md](AGENTS.md) for agent setup and verification steps.
-
-### Spotify developer setup
-
-1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → your app → **Settings**.
-2. Under **Redirect URIs**, add exactly: `http://127.0.0.1:4200`
-3. Remove `http://localhost:4200` if present — Spotify no longer accepts plain `localhost` for new apps.
-4. Copy your **Client ID** into `src/environments/environment.ts`.
-5. Select **Spotify** on the login screen, click **Log In**, approve access — you should return to the jukebox app.
+Cloud config: [`.cursor/environment.json`](.cursor/environment.json). Set `SPOTIFY_CLIENT_ID` in Cursor Cloud Secrets if agents need Spotify access. See [AGENTS.md](AGENTS.md).
 
 ### Optional: legacy Google Play Music proxy
 
@@ -44,12 +75,17 @@ npm run server   # port 5000 — requires config.yml with Google credentials
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Dev server with proxy config |
-| `npm run build` | Production build → `dist/jukebox-aurora` |
+| `npm run env:generate` | Build `environment.ts` from `.env` / environment variables |
+| `npm start` | Generate env + dev server on `127.0.0.1:4200` |
+| `npm run build` | Generate env + production build → `dist/jukebox-aurora` |
 | `npm test` | Karma/Jasmine unit tests |
 | `npm run e2e` | Playwright end-to-end tests |
 | `npm run lint` | ESLint |
 | `npm run server` | Legacy Express Google Music API proxy |
+
+## CI
+
+GitHub Actions workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) reads repository Secrets/Variables, generates `environment.ts`, then runs lint, build, and tests.
 
 ## Features
 

@@ -81,8 +81,8 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 
 ### Configuration & security
 
-- [x] `environment.example.ts` as a safe committed template (no secrets)
-- [x] `environment.ts` **gitignored** — local copy only; never committed
+- [x] GitHub Actions Secrets/Variables → generated `environment.ts` (gitignored)
+- [x] Local `.env` mirror for MacBook development (gitignored)
 - [x] Removed hardcoded Spotify client secret from source
 
 ### Tooling
@@ -120,16 +120,20 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 ```bash
 # Requires Node 20+
 npm install
-cp src/environments/environment.example.ts src/environments/environment.ts
-# Edit environment.ts with your Spotify client ID (this file is gitignored — not pushed to GitHub)
+cp .env.example .env
+# Add SPOTIFY_CLIENT_ID to .env (mirror of GitHub Secret)
 
-npm start          # Angular dev server on http://127.0.0.1:4200
+npm start          # generates environment.ts, dev server on http://127.0.0.1:4200
 npm run server     # Legacy Google Music proxy on :5000 (optional)
 npm test           # Karma unit tests
 npm run e2e        # Playwright (starts dev server automatically)
 npm run lint       # ESLint
 npm run build      # Production build → dist/jukebox-aurora
 ```
+
+GitHub repo Settings → Secrets and variables → Actions:
+- Secret: `SPOTIFY_CLIENT_ID`
+- Variable: `SPOTIFY_REDIRECT_URI` = `http://127.0.0.1:4200`
 
 ### Cursor Cloud Agents
 
@@ -138,6 +142,13 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 ---
 
 ## Changelog
+
+### 2025-06-22 — GitHub Secrets & Variables for configuration
+
+- Added `scripts/generate-environment.js` to build gitignored `environment.ts` from env vars
+- CI workflow (`.github/workflows/ci.yml`) reads `SPOTIFY_CLIENT_ID` (secret) and repo variables
+- Local dev uses gitignored `.env` (copy from `.env.example`) — GitHub Secrets do not sync to laptops
+- Removed committed `environment.prod.ts`; production flag set via `ENVIRONMENT=production` at generate time
 
 ### 2025-06-22 — Gitignore local environment.ts
 
