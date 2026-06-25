@@ -20,6 +20,10 @@ npm start
 
 Open [http://127.0.0.1:4200](http://127.0.0.1:4200) — use this address, not `localhost` (Spotify requires loopback IP for local redirects).
 
+### Cursor Cloud Agents
+
+Cloud environment config is committed at [`.cursor/environment.json`](.cursor/environment.json). See [AGENTS.md](AGENTS.md) for agent setup and verification steps.
+
 ### Spotify developer setup
 
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → your app → **Settings**.

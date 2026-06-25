@@ -123,13 +123,17 @@ npm install
 cp src/environments/environment.example.ts src/environments/environment.ts
 # Edit environment.ts with your Spotify client ID
 
-npm start          # Angular dev server on :4200
+npm start          # Angular dev server on http://127.0.0.1:4200
 npm run server     # Legacy Google Music proxy on :5000 (optional)
 npm test           # Karma unit tests
 npm run e2e        # Playwright (starts dev server automatically)
 npm run lint       # ESLint
 npm run build      # Production build → dist/jukebox-aurora
 ```
+
+### Cursor Cloud Agents
+
+Repo-level cloud environment config lives in [`.cursor/environment.json`](.cursor/environment.json). Agent-specific setup notes are in [AGENTS.md](AGENTS.md).
 
 ---
 

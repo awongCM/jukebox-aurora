@@ -1,0 +1,10 @@
+{
+  "install": "npm install && test -f src/environments/environment.ts || cp src/environments/environment.example.ts src/environments/environment.ts",
+  "terminals": [
+    {
+      "name": "jukebox-dev",
+      "command": "npm start",
+      "ports": [4200]
+    }
+  ]
+}
