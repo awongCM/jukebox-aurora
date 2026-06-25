@@ -42,8 +42,8 @@ testem.log
 /blob-report/
 /playwright/.cache/
 
-# local environment overrides (copy from environment.example.ts)
-src/environments/environment.local.ts
+# local environment config (copy from environment.example.ts — never commit secrets)
+src/environments/environment.ts
 
 # System Files
 .DS_Store

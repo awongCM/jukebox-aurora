@@ -42,7 +42,7 @@ The README captured honest scope: Spotify and Google Play were partially integra
 - **Google Play Music** shut down in 2020. The `playmusic` backend remains for historical reference but is not a viable long-term provider (Phase 2: Apple Music, YouTube Music, or local files).
 - **Secrets were hardcoded** in `spotify-api.service.ts` (client ID *and* client secret). Client secrets must never ship in frontend code.
 
-**Decision (Phase 1):** Move configuration to `environment.ts` / `environment.example.ts`. Remove `client_secret` from the frontend entirely. Document that Spotify login still uses the legacy implicit flow temporarily — PKCE migration is explicitly Phase 2.
+**Decision (Phase 1):** Move configuration to `environment.example.ts` (committed template) and **`environment.ts` (gitignored, local only)**. Remove `client_secret` from the frontend entirely. Spotify auth migrated to PKCE in a follow-up fix.
 
 ### 3. Architecture was started but not finished
 
@@ -81,8 +81,8 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 
 ### Configuration & security
 
-- [x] `environment.ts` / `environment.prod.ts` for Spotify client ID and API URLs
-- [x] `environment.example.ts` as a safe template (no secrets committed)
+- [x] `environment.example.ts` as a safe committed template (no secrets)
+- [x] `environment.ts` **gitignored** — local copy only; never committed
 - [x] Removed hardcoded Spotify client secret from source
 
 ### Tooling
@@ -121,7 +121,7 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 # Requires Node 20+
 npm install
 cp src/environments/environment.example.ts src/environments/environment.ts
-# Edit environment.ts with your Spotify client ID
+# Edit environment.ts with your Spotify client ID (this file is gitignored — not pushed to GitHub)
 
 npm start          # Angular dev server on http://127.0.0.1:4200
 npm run server     # Legacy Google Music proxy on :5000 (optional)
@@ -139,7 +139,12 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 
 ## Changelog
 
-### 2025-06-22 — Spotify PKCE auth fix
+### 2025-06-22 — Gitignore local environment.ts
+
+- `src/environments/environment.ts` is now **gitignored** so Spotify client IDs stay on your machine only
+- Committed template remains `environment.example.ts` (placeholders only)
+
+### 2025-06-22 — Cursor Cloud environment config
 
 - Migrated Spotify login from deprecated implicit grant (`response_type=token`) to **Authorization Code + PKCE**
 - Changed redirect URI from `http://localhost:4200` to **`http://127.0.0.1:4200`** (Spotify security requirement)

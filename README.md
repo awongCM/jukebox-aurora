@@ -13,7 +13,7 @@ Jukebox Music Playing App — browse your music collection from cloud APIs on a 
 ```bash
 npm install
 cp src/environments/environment.example.ts src/environments/environment.ts
-# Add your Spotify client ID to environment.ts
+# Edit environment.ts locally with your Spotify client ID — this file is gitignored
 
 npm start
 ```

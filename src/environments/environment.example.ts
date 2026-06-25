@@ -1,6 +1,6 @@
 /**
- * Copy this file to environment.ts and fill in your local values.
- * environment.ts is gitignored when you use environment.local.ts overrides.
+ * Template for local development — safe to commit (no real credentials).
+ * Copy to environment.ts (gitignored) and add your Spotify client ID locally.
  *
  * @see MODERNIZATION_LOG.md — "Environment-based configuration"
  */
