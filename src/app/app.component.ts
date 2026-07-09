@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
   isPlaying = false;
   audio: HTMLAudioElement | null = null;
   disc: HTMLElement | null = null;
+  private loadedStreamUrl = '';
 
   readonly THRESHOLD = 0.6;
   readonly DEFAULT_SPEED = 7;
@@ -64,6 +65,8 @@ export class AppComponent implements OnInit {
       this.spotifyAPI.initializeAuth().subscribe((authenticated) => {
         if (authenticated) {
           this.loadSpotifyTracks();
+        } else if (new URLSearchParams(window.location.search).has('code')) {
+          alert('Spotify login failed. Please try again.');
         }
       });
     } else if (this.selected_radio_api_service === 'GPM') {
@@ -92,6 +95,11 @@ export class AppComponent implements OnInit {
   }
 
   login(): void {
+    if (!this.selected_radio_api_service) {
+      alert('Please select Spotify or Google Play before logging in.');
+      return;
+    }
+
     if (this.selected_radio_api_service === 'SPM') {
       void this.spotifyAPI.requestAuthorization();
     } else {
@@ -100,15 +108,20 @@ export class AppComponent implements OnInit {
   }
 
   private loadSpotifyTracks(): void {
-    this.spotifyAPI.getUserTracks().subscribe((data) => {
-      this.tracks = data.items.map((item) => ({
-        album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
-        id: item.track.id,
-        title: item.track.name,
-        album: item.track.album.name,
-        artist: item.track.artists[0]?.name ?? 'Unknown artist',
-        stream_url: item.track.preview_url ?? '',
-      }));
+    this.spotifyAPI.getUserTracks().subscribe({
+      next: (data) => {
+        this.tracks = data.items.map((item) => ({
+          album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
+          id: item.track.id,
+          title: item.track.name,
+          album: item.track.album.name,
+          artist: item.track.artists[0]?.name ?? 'Unknown artist',
+          stream_url: item.track.preview_url ?? '',
+        }));
+      },
+      error: () => {
+        alert('Failed to load your Spotify library. Try logging out and back in.');
+      },
     });
   }
 
@@ -158,12 +171,19 @@ export class AppComponent implements OnInit {
   track_select(track: Track): void {
     this.selected_track = track;
     this.isPlaying = false;
+    this.resetAudioPlayer();
 
     if (this.selected_radio_api_service === 'GPM') {
-      this.gmusicAPI.getStreamUrl(this.selected_track.id).subscribe((data) => {
-        if (this.selected_track) {
-          this.selected_track.stream_url = data.stream_url;
-        }
+      this.gmusicAPI.getStreamUrl(this.selected_track.id).subscribe({
+        next: (data) => {
+          if (this.selected_track) {
+            this.selected_track.stream_url = data.stream_url;
+            this.syncAudioSource();
+          }
+        },
+        error: () => {
+          alert('Failed to load the stream URL for this track.');
+        },
       });
     }
 
@@ -201,23 +221,41 @@ export class AppComponent implements OnInit {
     event.preventDefault();
     this.isPlaying = !this.isPlaying;
 
-    if (this.audio === null) {
-      this.audio = document.getElementById('player_audio') as HTMLAudioElement | null;
-      if (this.audio) {
-        this.audio.src = this.display_album_url();
-        this.audio.load();
-      }
-    }
-
+    this.audio = document.getElementById('player_audio') as HTMLAudioElement | null;
     if (!this.audio) {
       return;
     }
+
+    this.syncAudioSource();
 
     if (this.isPlaying) {
       void this.audio.play();
     } else {
       this.audio.pause();
     }
+  }
+
+  private resetAudioPlayer(): void {
+    if (this.audio) {
+      this.audio.pause();
+    }
+    this.audio = null;
+    this.loadedStreamUrl = '';
+  }
+
+  private syncAudioSource(): void {
+    if (!this.audio) {
+      return;
+    }
+
+    const streamUrl = this.display_album_url();
+    if (!streamUrl || this.loadedStreamUrl === streamUrl) {
+      return;
+    }
+
+    this.loadedStreamUrl = streamUrl;
+    this.audio.src = streamUrl;
+    this.audio.load();
   }
 
   pause_play_state(): string {

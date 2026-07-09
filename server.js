@@ -31,14 +31,15 @@ router.get("/", function(req, res) {
 
 // middleware to use for all requests
 router.use(function(req, res, next) {
-  // do logging
-  // console.log('Something is happening.');
-  next(); // make sure we go to the next routes and don't stop here
+  next();
 });
 
 router.route("/login").post(function(req, res) {
   pm.login({ email: EMAIL, password: PASSWORD }, function(err, credentials) {
-    if (err) res.send({ error: err });
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+
     masterToken = credentials.masterToken;
 
     pm.init(
@@ -47,7 +48,9 @@ router.route("/login").post(function(req, res) {
         masterToken: credentials.masterToken
       },
       function(err, data) {
-        if (err) res.send({ error: err });
+        if (err) {
+          return res.status(500).json({ error: err });
+        }
         res.json({
           message: "Google Account Logged In!",
           accessToken: masterToken
@@ -58,14 +61,15 @@ router.route("/login").post(function(req, res) {
 });
 
 router.route("/logout").post(function(req, res) {
-  //for now just send a blank accessToken to client
   masterToken = null;
   res.json({ message: "Google Account Logged Out", accessToken: masterToken });
 });
 
 router.route("/songs").get(function(req, res) {
   pm.getAllTracks(function(err, library) {
-    if (err) res.send({ error: err });
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
     const songs = library.data.items;
     res.json({ message: "All songs fetched", songs: songs });
   });
@@ -73,7 +77,9 @@ router.route("/songs").get(function(req, res) {
 
 router.route("/songs/:id").get(function(req, res) {
   pm.getStreamUrl(req.params.id, function(err, url) {
-    if (err) res.send({ error: err });
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
     const stream_url = url;
     res.json({ message: "A song is fetched", stream_url: stream_url });
   });

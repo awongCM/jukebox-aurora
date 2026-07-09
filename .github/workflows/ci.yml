@@ -28,9 +28,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate environment from GitHub Secrets/Variables
-        run: npm run env:generate
-
       - name: Lint
         run: npm run lint
 

@@ -32,7 +32,9 @@ Credentials are **not stored in git**. Use [GitHub Secrets and variables](https:
 
 | Name | Type | Example | Required |
 |------|------|---------|----------|
-| `SPOTIFY_CLIENT_ID` | **Secret** | `976b920abb9946b987f1dfe7e95c1942` | Yes (for Spotify login) |
+| `SPOTIFY_CLIENT_ID` | **Secret** | your Spotify client ID | Yes (for Spotify login) |
+
+> **Note:** For single-page apps, the Spotify Client ID is embedded in the compiled JavaScript bundle at build time — that is normal for OAuth public clients using PKCE. GitHub Secrets keep it out of git history, not out of the browser. Never put a Spotify **client secret** in this app.
 | `SPOTIFY_REDIRECT_URI` | **Variable** | `http://127.0.0.1:4200` | Recommended |
 | `GOOGLE_MUSIC_API_BASE_URL` | **Variable** | `http://localhost:5000/api` | Optional |
 

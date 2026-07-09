@@ -173,11 +173,13 @@ export class SpotifyAPIService {
   }
 
   private generateRandomString(length: number): string {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
     const combinations =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
-      result += combinations.charAt(Math.floor(Math.random() * combinations.length));
+      result += combinations.charAt(array[i] % combinations.length);
     }
     return result;
   }

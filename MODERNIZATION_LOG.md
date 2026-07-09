@@ -143,6 +143,15 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 
 ## Changelog
 
+### 2025-06-22 — Code review fixes
+
+- Fixed audio player not updating when switching tracks
+- Production builds now generate `environment.production: true` via `env:generate:prod`
+- Restored `enableProdMode()` in `main.ts`
+- Added `pretest` hook; hardened `server.js` error handling
+- Spotify OAuth state uses `crypto.getRandomValues()`; added service unit tests
+- Login requires provider selection; API failures surface user alerts
+
 ### 2025-06-22 — GitHub Secrets & Variables for configuration
 
 - Added `scripts/generate-environment.js` to build gitignored `environment.ts` from env vars
