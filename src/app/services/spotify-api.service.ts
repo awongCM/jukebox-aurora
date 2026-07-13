@@ -33,7 +33,7 @@ export class SpotifyAPIService {
   /**
    * Handles PKCE callback, restores a stored session, or returns false.
    */
-  initializeAuth(): Observable<boolean> {
+  initializeAuth(): Observable<SpotifyAuthResult> {
     this.restoreStoredToken();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -41,12 +41,12 @@ export class SpotifyAPIService {
     if (error) {
       console.error('Spotify authorization denied:', error);
       this.clearAuthQueryParams();
-      return of(false);
+      return of({ authenticated: false, error });
     }
 
     const code = urlParams.get('code');
     if (!code) {
-      return of(this.isTokenValid());
+      return of({ authenticated: this.isTokenValid() });
     }
 
     const state = urlParams.get('state');
@@ -54,14 +54,14 @@ export class SpotifyAPIService {
     if (!state || state !== storedState) {
       console.error('Spotify state mismatch — possible CSRF attempt');
       this.clearAuthQueryParams();
-      return of(false);
+      return of({ authenticated: false, error: 'state_mismatch' });
     }
 
     const codeVerifier = sessionStorage.getItem(this.codeVerifierKey);
     if (!codeVerifier) {
       console.error('Spotify code verifier missing from session');
       this.clearAuthQueryParams();
-      return of(false);
+      return of({ authenticated: false, error: 'missing_code_verifier' });
     }
 
     return this.exchangeCodeForToken(code, codeVerifier).pipe(
@@ -70,10 +70,10 @@ export class SpotifyAPIService {
         sessionStorage.removeItem(this.codeVerifierKey);
         this.clearAuthQueryParams();
       }),
-      map(() => true),
+      map(() => ({ authenticated: true })),
       catchError((err) => {
         console.error('Spotify token exchange failed', err);
-        return of(false);
+        return of({ authenticated: false, error: 'token_exchange_failed' });
       }),
     );
   }
@@ -214,6 +214,11 @@ export interface SpotifySavedTracksResponse {
         images: { url: string }[];
       };
       artists: { name: string }[];
-    };
+    } | null;
   }[];
+}
+
+export interface SpotifyAuthResult {
+  authenticated: boolean;
+  error?: string;
 }

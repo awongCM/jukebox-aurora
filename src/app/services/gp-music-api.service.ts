@@ -39,7 +39,11 @@ export class GooglePlayMusicAPIService {
           window.location.reload();
         }),
       )
-      .subscribe();
+      .subscribe({
+        error: () => {
+          alert('Failed to connect to the Google Play Music proxy. Is npm run server running?');
+        },
+      });
   }
 
   endAuthorizationRequest(): void {

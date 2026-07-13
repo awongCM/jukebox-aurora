@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { SpotifyAPIService } from './spotify-api.service';
+import { SpotifyAPIService, SpotifyAuthResult } from './spotify-api.service';
 
 describe('SpotifyAPIService', () => {
   let service: SpotifyAPIService;
@@ -28,13 +28,27 @@ describe('SpotifyAPIService', () => {
     sessionStorage.setItem('spotify_access_token', 'stored-token');
     sessionStorage.setItem('spotify_token_type', 'Bearer');
 
-    let authenticated = false;
-    service.initializeAuth().subscribe((result) => {
-      authenticated = result;
+    let result: SpotifyAuthResult = { authenticated: false };
+    service.initializeAuth().subscribe((authResult) => {
+      result = authResult;
     });
 
-    expect(authenticated).toBeTrue();
+    expect(result.authenticated).toBeTrue();
     expect(service.isTokenValid()).toBeTrue();
+  });
+
+  it('returns an error when Spotify denies authorization', () => {
+    window.history.pushState({}, '', '/?error=access_denied');
+
+    let result: SpotifyAuthResult = { authenticated: true };
+    service.initializeAuth().subscribe((authResult) => {
+      result = authResult;
+    });
+
+    expect(result.authenticated).toBeFalse();
+    expect(result.error).toBe('access_denied');
+    httpMock.expectNone('https://accounts.spotify.com/api/token');
+    window.history.pushState({}, '', '/');
   });
 
   it('rejects callback when OAuth state does not match', () => {
@@ -42,12 +56,13 @@ describe('SpotifyAPIService', () => {
     window.history.pushState({}, '', '/?code=auth-code&state=wrong-state');
     sessionStorage.setItem('spotify_code_verifier', 'verifier');
 
-    let authenticated = true;
-    service.initializeAuth().subscribe((result) => {
-      authenticated = result;
+    let result: SpotifyAuthResult = { authenticated: true };
+    service.initializeAuth().subscribe((authResult) => {
+      result = authResult;
     });
 
-    expect(authenticated).toBeFalse();
+    expect(result.authenticated).toBeFalse();
+    expect(result.error).toBe('state_mismatch');
     httpMock.expectNone('https://accounts.spotify.com/api/token');
     window.history.pushState({}, '', '/');
   });
@@ -57,9 +72,9 @@ describe('SpotifyAPIService', () => {
     sessionStorage.setItem('spotify_code_verifier', 'verifier');
     window.history.pushState({}, '', '/?code=auth-code&state=expected-state');
 
-    let authenticated = false;
-    service.initializeAuth().subscribe((result) => {
-      authenticated = result;
+    let result: SpotifyAuthResult = { authenticated: false };
+    service.initializeAuth().subscribe((authResult) => {
+      result = authResult;
     });
 
     const request = httpMock.expectOne('https://accounts.spotify.com/api/token');
@@ -74,7 +89,7 @@ describe('SpotifyAPIService', () => {
       scope: 'user-library-read',
     });
 
-    expect(authenticated).toBeTrue();
+    expect(result.authenticated).toBeTrue();
     expect(service.isTokenValid()).toBeTrue();
     expect(sessionStorage.getItem('spotify_access_token')).toBe('fresh-token');
     window.history.pushState({}, '', '/');

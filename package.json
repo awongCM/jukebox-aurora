@@ -8,6 +8,7 @@
     "env:generate:prod": "ENVIRONMENT=production node scripts/generate-environment.js",
     "prestart": "npm run env:generate",
     "prebuild": "npm run env:generate:prod",
+    "prelint": "npm run env:generate",
     "pretest": "npm run env:generate",
     "start": "ng serve --host 127.0.0.1",
     "build": "ng build",

@@ -18,7 +18,7 @@ describe('AppComponent', () => {
         {
           provide: SpotifyAPIService,
           useValue: {
-            initializeAuth: () => of(false),
+            initializeAuth: () => of({ authenticated: false }),
             isTokenValid: () => false,
             requestAuthorization: () => Promise.resolve(),
             endAuthorizationRequest: () => undefined,

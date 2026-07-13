@@ -33,10 +33,10 @@ Credentials are **not stored in git**. Use [GitHub Secrets and variables](https:
 | Name | Type | Example | Required |
 |------|------|---------|----------|
 | `SPOTIFY_CLIENT_ID` | **Secret** | your Spotify client ID | Yes (for Spotify login) |
-
-> **Note:** For single-page apps, the Spotify Client ID is embedded in the compiled JavaScript bundle at build time — that is normal for OAuth public clients using PKCE. GitHub Secrets keep it out of git history, not out of the browser. Never put a Spotify **client secret** in this app.
 | `SPOTIFY_REDIRECT_URI` | **Variable** | `http://127.0.0.1:4200` | Recommended |
 | `GOOGLE_MUSIC_API_BASE_URL` | **Variable** | `http://localhost:5000/api` | Optional |
+
+> **Note:** For single-page apps, the Spotify Client ID is embedded in the compiled JavaScript bundle at build time — that is normal for OAuth public clients using PKCE. GitHub Secrets keep it out of git history, not out of the browser. Never put a Spotify **client secret** in this app.
 
 See GitHub’s guide: [Storing your secrets safely](https://docs.github.com/en/get-started/learning-to-code/storing-your-secrets-safely).
 
@@ -100,11 +100,13 @@ GitHub Actions workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) r
 
 ## Planned (see MODERNIZATION_LOG.md)
 
-- Spotify PKCE auth + Web Playback SDK
-- iTunes / Apple Music search
-- Component architecture refactor
-- Secure backend token storage
-- Deployment to Render
+**Phase 2 (in progress):** Spotify token refresh, Web Playback SDK, iTunes search, replace Google Play Music
+
+**Phase 3:** Component architecture refactor (`MusicAPIInterface` strategy)
+
+**Phase 4:** UI polish — Web Audio, responsive layout, accessibility
+
+**Phase 5:** Secure backend token exchange; Render deployment
 
 ## Version history
 

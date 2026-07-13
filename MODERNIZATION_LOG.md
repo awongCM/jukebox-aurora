@@ -103,15 +103,44 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 
 ---
 
-## Phase roadmap (future entries)
+## Phase roadmap
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| **1** | Toolchain, HttpClient, standalone bootstrap, env config, lint/e2e | **Complete** |
-| **2** | Spotify PKCE + Web Playback SDK; replace Google Play; iTunes search | Planned |
-| **3** | Extract carousel/player/button components; `MusicAPIInterface` strategy | Planned |
-| **4** | UI polish — Web Audio visualizations, responsive layout, CSS modernization | Planned |
-| **5** | Secure backend token exchange; Render deployment | Planned |
+| **1** | Toolchain, HttpClient, standalone bootstrap, env config, lint/e2e, CI | **Complete** |
+| **2** | Music APIs — Spotify PKCE, Web Playback SDK, token refresh, iTunes search, replace Google Play | **In progress** (~30%) |
+| **3** | Extract carousel/player/button components; `MusicAPIInterface` strategy pattern | **Not started** |
+| **4** | UI polish — Web Audio visualizations, responsive layout, CSS modernization, a11y | **Not started** |
+| **5** | Secure backend token exchange; Render deployment | **Not started** |
+
+### Phase 2 detail — what’s done vs. planned
+
+| Item | Status |
+|------|--------|
+| Spotify PKCE authorization (replace implicit grant) | **Done** |
+| Redirect URI `http://127.0.0.1:4200` | **Done** |
+| Spotify Web Playback SDK wired for full-track playback | **Not started** (script loads; handler is a stub) |
+| Spotify token refresh (use stored refresh token) | **Not started** |
+| Spotify library pagination (`/v1/me/tracks` next pages) | **Not started** |
+| iTunes Search API (no auth required) | **Stub only** — `ItunesMusicSearchAPIService` |
+| Replace Google Play Music (shut down 2020) | **Not started** — legacy `playmusic` proxy remains |
+| SoundCloud integration | **Not started** (was blocked in original README) |
+
+### Phase 3 detail — scaffolded but not wired
+
+These components exist as standalone stubs; all UI logic still lives in `AppComponent`:
+
+- `JukeboxPlayerComponent`
+- `PlaylistCarouselComponent`
+- `ButtonGroupComponent`
+- `TitleHeaderComponent`
+
+`MusicAPIInterface` in `jukebox-interface.ts` is defined but not implemented by any service.
+
+### Phase 4–5 — not started
+
+- Phase 4: Aurora/Web Audio reactivity, responsive carousel, modern CSS (`color-mix`, drop `-webkit-` prefixes)
+- Phase 5: Backend OAuth token exchange (keep secrets off client), Render static site + proxy deployment
 
 ---
 
@@ -142,6 +171,13 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 ---
 
 ## Changelog
+
+### 2025-07-13 — Second code review fixes
+
+- Filter null Spotify tracks (delisted/unavailable songs no longer crash library load)
+- Surface Spotify OAuth `error` callbacks with user-facing alerts
+- Add `prelint` hook; GPM login/library errors now alert the user
+- Expanded phase roadmap with done vs. planned breakdown
 
 ### 2025-06-22 — Code review fixes
 

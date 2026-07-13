@@ -62,28 +62,47 @@ export class AppComponent implements OnInit {
     this.refreshTitle();
 
     if (this.selected_radio_api_service === 'SPM') {
-      this.spotifyAPI.initializeAuth().subscribe((authenticated) => {
-        if (authenticated) {
+      this.spotifyAPI.initializeAuth().subscribe((result) => {
+        if (result.authenticated) {
           this.loadSpotifyTracks();
-        } else if (new URLSearchParams(window.location.search).has('code')) {
-          alert('Spotify login failed. Please try again.');
+        } else if (result.error) {
+          alert(this.spotifyAuthErrorMessage(result.error));
         }
       });
     } else if (this.selected_radio_api_service === 'GPM') {
       this.gmusicAPI.checkValidAuthorization();
       if (this.hasValidToken()) {
-        this.gmusicAPI.getUserTracks().subscribe((data) => {
-          this.tracks = data.songs.map((song) => ({
-            album_artwork: song.albumArtRef[0]?.url ?? '',
-            id: song.id,
-            title: song.title,
-            album: song.album,
-            artist: song.artist,
-            stream_url: song.stream_url ?? '',
-          }));
-        });
+        this.loadGooglePlayTracks();
       }
     }
+  }
+
+  private spotifyAuthErrorMessage(error: string): string {
+    if (error === 'access_denied') {
+      return 'Spotify login was cancelled. Please try again if you want to connect your library.';
+    }
+    if (error === 'token_exchange_failed') {
+      return 'Spotify login failed during token exchange. Please try again.';
+    }
+    return `Spotify login failed (${error}). Please try again.`;
+  }
+
+  private loadGooglePlayTracks(): void {
+    this.gmusicAPI.getUserTracks().subscribe({
+      next: (data) => {
+        this.tracks = data.songs.map((song) => ({
+          album_artwork: song.albumArtRef[0]?.url ?? '',
+          id: song.id,
+          title: song.title,
+          album: song.album,
+          artist: song.artist,
+          stream_url: song.stream_url ?? '',
+        }));
+      },
+      error: () => {
+        alert('Failed to load your Google Play library. Is the local proxy server running?');
+      },
+    });
   }
 
   private refreshTitle(): void {
@@ -110,14 +129,20 @@ export class AppComponent implements OnInit {
   private loadSpotifyTracks(): void {
     this.spotifyAPI.getUserTracks().subscribe({
       next: (data) => {
-        this.tracks = data.items.map((item) => ({
-          album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
-          id: item.track.id,
-          title: item.track.name,
-          album: item.track.album.name,
-          artist: item.track.artists[0]?.name ?? 'Unknown artist',
-          stream_url: item.track.preview_url ?? '',
-        }));
+        this.tracks = data.items.flatMap((item) => {
+          if (!item.track) {
+            return [];
+          }
+
+          return [{
+            album_artwork: item.track.album.images[1]?.url ?? item.track.album.images[0]?.url ?? '',
+            id: item.track.id,
+            title: item.track.name,
+            album: item.track.album.name,
+            artist: item.track.artists[0]?.name ?? 'Unknown artist',
+            stream_url: item.track.preview_url ?? '',
+          }];
+        });
       },
       error: () => {
         alert('Failed to load your Spotify library. Try logging out and back in.');
