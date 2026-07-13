@@ -108,7 +108,7 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 | Phase | Focus | Status |
 |-------|-------|--------|
 | **1** | Toolchain, HttpClient, standalone bootstrap, env config, lint/e2e, CI | **Complete** |
-| **2** | Music APIs — Spotify PKCE, Web Playback SDK, token refresh, iTunes search, replace Google Play | **In progress** (~30%) |
+| **2** | Music APIs — Spotify PKCE, Web Playback SDK, token refresh, iTunes search, replace Google Play | **In progress** (~85%) |
 | **3** | Extract carousel/player/button components; `MusicAPIInterface` strategy pattern | **Not started** |
 | **4** | UI polish — Web Audio visualizations, responsive layout, CSS modernization, a11y | **Not started** |
 | **5** | Secure backend token exchange; Render deployment | **Not started** |
@@ -119,11 +119,11 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 |------|--------|
 | Spotify PKCE authorization (replace implicit grant) | **Done** |
 | Redirect URI `http://127.0.0.1:4200` | **Done** |
-| Spotify Web Playback SDK wired for full-track playback | **Not started** (script loads; handler is a stub) |
-| Spotify token refresh (use stored refresh token) | **Not started** |
-| Spotify library pagination (`/v1/me/tracks` next pages) | **Not started** |
-| iTunes Search API (no auth required) | **Stub only** — `ItunesMusicSearchAPIService` |
-| Replace Google Play Music (shut down 2020) | **Not started** — legacy `playmusic` proxy remains |
+| Spotify Web Playback SDK wired for full-track playback | **Done** (requires Spotify Premium; falls back to preview URLs) |
+| Spotify token refresh (use stored refresh token) | **Done** |
+| Spotify library pagination (`/v1/me/tracks` next pages) | **Done** |
+| iTunes Search API (no auth required) | **Done** — replaces Google Play in UI |
+| Replace Google Play Music (shut down 2020) | **Done** — iTunes search provider; legacy `playmusic` proxy kept for reference |
 | SoundCloud integration | **Not started** (was blocked in original README) |
 
 ### Phase 3 detail — scaffolded but not wired
@@ -171,6 +171,15 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 ---
 
 ## Changelog
+
+### 2025-07-13 — Phase 2 music APIs
+
+- Spotify token refresh with expiry tracking; API calls auto-refresh before expiry
+- Expanded OAuth scopes for Web Playback SDK streaming
+- Spotify Web Playback SDK wired via `SpotifyPlaybackService` (Premium full-track playback)
+- Spotify saved-tracks library pagination (follows `next` links)
+- iTunes Search API implemented; replaces Google Play in provider UI
+- Unit tests for token refresh, pagination, and iTunes search
 
 ### 2025-07-13 — Second code review fixes
 

@@ -4,6 +4,8 @@ import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { ScriptService } from './services/script.service';
 import { SpotifyAPIService } from './services/spotify-api.service';
+import { SpotifyPlaybackService } from './services/spotify-playback.service';
+import { ItunesMusicSearchAPIService } from './services/itunes-music-api.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -23,6 +25,25 @@ describe('AppComponent', () => {
             requestAuthorization: () => Promise.resolve(),
             endAuthorizationRequest: () => undefined,
             getUserTracks: () => of({ items: [] }),
+          },
+        },
+        {
+          provide: SpotifyPlaybackService,
+          useValue: {
+            markSdkReady: () => undefined,
+            initializePlayer: () => undefined,
+            isPlayerReady: () => false,
+            getIsPlaying: () => false,
+            playTrack: () => Promise.resolve(false),
+            togglePlay: () => Promise.resolve(),
+            pause: () => Promise.resolve(),
+            disconnect: () => undefined,
+          },
+        },
+        {
+          provide: ItunesMusicSearchAPIService,
+          useValue: {
+            searchTracks: () => of([]),
           },
         },
       ],

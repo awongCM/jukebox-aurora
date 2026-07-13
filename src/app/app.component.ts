@@ -1,12 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SpotifyAPIService } from './services/spotify-api.service';
-import { GooglePlayMusicAPIService } from './services/gp-music-api.service';
+import { SpotifyPlaybackService } from './services/spotify-playback.service';
+import { ItunesMusicSearchAPIService } from './services/itunes-music-api.service';
 import { Track } from './services/jukebox-interface';
-import { PlugnPlayWindow } from './browsers/window-interface';
 import { ScriptService } from './services/script.service';
-
-declare const window: PlugnPlayWindow;
 
 @Component({
   selector: 'app-root',
@@ -17,7 +15,8 @@ declare const window: PlugnPlayWindow;
 })
 export class AppComponent implements OnInit {
   readonly spotifyAPI = inject(SpotifyAPIService);
-  readonly gmusicAPI = inject(GooglePlayMusicAPIService);
+  readonly spotifyPlayback = inject(SpotifyPlaybackService);
+  readonly itunesAPI = inject(ItunesMusicSearchAPIService);
   private readonly scriptService = inject(ScriptService);
 
   title = 'Welcome to my JukeBox Aurora App';
@@ -31,6 +30,7 @@ export class AppComponent implements OnInit {
   audio: HTMLAudioElement | null = null;
   disc: HTMLElement | null = null;
   private loadedStreamUrl = '';
+  useSpotifyPlayback = false;
 
   readonly THRESHOLD = 0.6;
   readonly DEFAULT_SPEED = 7;
@@ -46,15 +46,15 @@ export class AppComponent implements OnInit {
     console.log('Hello Jukebox Aurora App initialised');
 
     this.scriptService.loadScript('spotifysdk').then(() => {
-      this.initiateWebPlayback();
-    });
-  }
+      this.spotifyPlayback.markSdkReady();
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        this.spotifyPlayback.initializePlayer();
+      };
 
-  private initiateWebPlayback(): void {
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      // Phase 2: wire up Spotify Web Playback SDK with PKCE-backed tokens.
-      console.log('Spotify Web Playback SDK ready');
-    };
+      if (typeof Spotify !== 'undefined') {
+        window.onSpotifyWebPlaybackSDKReady();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -69,11 +69,6 @@ export class AppComponent implements OnInit {
           alert(this.spotifyAuthErrorMessage(result.error));
         }
       });
-    } else if (this.selected_radio_api_service === 'GPM') {
-      this.gmusicAPI.checkValidAuthorization();
-      if (this.hasValidToken()) {
-        this.loadGooglePlayTracks();
-      }
     }
   }
 
@@ -84,46 +79,49 @@ export class AppComponent implements OnInit {
     if (error === 'token_exchange_failed') {
       return 'Spotify login failed during token exchange. Please try again.';
     }
+    if (error === 'token_refresh_failed') {
+      return 'Spotify session expired. Please log in again.';
+    }
     return `Spotify login failed (${error}). Please try again.`;
-  }
-
-  private loadGooglePlayTracks(): void {
-    this.gmusicAPI.getUserTracks().subscribe({
-      next: (data) => {
-        this.tracks = data.songs.map((song) => ({
-          album_artwork: song.albumArtRef[0]?.url ?? '',
-          id: song.id,
-          title: song.title,
-          album: song.album,
-          artist: song.artist,
-          stream_url: song.stream_url ?? '',
-        }));
-      },
-      error: () => {
-        alert('Failed to load your Google Play library. Is the local proxy server running?');
-      },
-    });
   }
 
   private refreshTitle(): void {
     if (this.selected_radio_api_service === 'SPM') {
       this.title = 'Spotify Music Collection';
-    } else if (this.selected_radio_api_service === 'GPM') {
-      this.title = 'Google Play Collection';
+    } else if (this.selected_radio_api_service === 'ITM') {
+      this.title = 'iTunes Music Search';
     }
   }
 
   login(): void {
     if (!this.selected_radio_api_service) {
-      alert('Please select Spotify or Google Play before logging in.');
+      alert('Please select Spotify or iTunes before continuing.');
       return;
     }
 
     if (this.selected_radio_api_service === 'SPM') {
       void this.spotifyAPI.requestAuthorization();
-    } else {
-      this.gmusicAPI.requestAuthorization();
     }
+  }
+
+  searchItunes(term: string): void {
+    const trimmed = term.trim();
+    if (!trimmed) {
+      alert('Enter a search term to find music on iTunes.');
+      return;
+    }
+
+    this.itunesAPI.searchTracks(trimmed).subscribe({
+      next: (tracks) => {
+        this.tracks = tracks;
+        if (tracks.length === 0) {
+          alert('No tracks found. Try a different search term.');
+        }
+      },
+      error: () => {
+        alert('Failed to search iTunes. Please try again.');
+      },
+    });
   }
 
   private loadSpotifyTracks(): void {
@@ -153,10 +151,13 @@ export class AppComponent implements OnInit {
   logout(): void {
     if (this.selected_radio_api_service === 'SPM') {
       this.spotifyAPI.endAuthorizationRequest();
-    } else {
-      this.gmusicAPI.endAuthorizationRequest();
+      this.spotifyPlayback.disconnect();
     }
 
+    this.tracks = [];
+    this.selected_track = null;
+    this.isPlaying = false;
+    this.useSpotifyPlayback = false;
     localStorage.removeItem(this.radio_api_service_state_key);
     window.location.reload();
   }
@@ -164,6 +165,7 @@ export class AppComponent implements OnInit {
   toggle_radio_api_server(value: string): void {
     this.selected_radio_api_service = value;
     localStorage.setItem(this.radio_api_service_state_key, value);
+    this.refreshTitle();
   }
 
   toggle(): void {
@@ -197,18 +199,14 @@ export class AppComponent implements OnInit {
     this.selected_track = track;
     this.isPlaying = false;
     this.resetAudioPlayer();
+    this.useSpotifyPlayback = false;
 
-    if (this.selected_radio_api_service === 'GPM') {
-      this.gmusicAPI.getStreamUrl(this.selected_track.id).subscribe({
-        next: (data) => {
-          if (this.selected_track) {
-            this.selected_track.stream_url = data.stream_url;
-            this.syncAudioSource();
-          }
-        },
-        error: () => {
-          alert('Failed to load the stream URL for this track.');
-        },
+    if (this.selected_radio_api_service === 'SPM' && this.spotifyPlayback.isPlayerReady()) {
+      void this.spotifyPlayback.playTrack(track.id).then((started) => {
+        this.useSpotifyPlayback = started;
+        if (started) {
+          this.isPlaying = true;
+        }
       });
     }
 
@@ -244,6 +242,14 @@ export class AppComponent implements OnInit {
 
   pause_play_track(event: Event): void {
     event.preventDefault();
+
+    if (this.useSpotifyPlayback && this.spotifyPlayback.isPlayerReady()) {
+      void this.spotifyPlayback.togglePlay().then(() => {
+        this.isPlaying = this.spotifyPlayback.getIsPlaying();
+      });
+      return;
+    }
+
     this.isPlaying = !this.isPlaying;
 
     this.audio = document.getElementById('player_audio') as HTMLAudioElement | null;
@@ -289,6 +295,9 @@ export class AppComponent implements OnInit {
 
   reset_play_state(): void {
     this.isPlaying = false;
+    if (this.useSpotifyPlayback) {
+      void this.spotifyPlayback.pause();
+    }
   }
 
   scroll_tracks(event: MouseEvent): void {
@@ -329,6 +338,13 @@ export class AppComponent implements OnInit {
     if (this.selected_radio_api_service === 'SPM') {
       return this.spotifyAPI.isTokenValid();
     }
-    return this.gmusicAPI.isTokenValid();
+    if (this.selected_radio_api_service === 'ITM') {
+      return this.tracks.length > 0;
+    }
+    return false;
+  }
+
+  showItunesSearch(): boolean {
+    return this.selected_radio_api_service === 'ITM' && !this.hasValidToken();
   }
 }

@@ -91,16 +91,16 @@ GitHub Actions workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) r
 
 ## Features
 
-- Spotify library browsing (preview playback; full playback planned Phase 2)
-- Google Play Music integration via local proxy (deprecated provider)
+- Spotify library browsing (full-track playback via Web Playback SDK for Premium users; preview fallback)
+- iTunes Search integration (30-second preview playback, no auth required)
 - 3D perspective carousel with hover-to-scroll
 - Animated jukebox player with aurora border lighting
 - Fullscreen mode
-- Provider switching (Spotify / Google Play)
+- Provider switching (Spotify / iTunes)
 
 ## Planned (see MODERNIZATION_LOG.md)
 
-**Phase 2 (in progress):** Spotify token refresh, Web Playback SDK, iTunes search, replace Google Play Music
+**Phase 2 (in progress):** SoundCloud integration (blocked by original API constraints)
 
 **Phase 3:** Component architecture refactor (`MusicAPIInterface` strategy)
 
