@@ -8,21 +8,14 @@ export interface Track {
 }
 
 /**
-|--------------------------------------------------
-| TODO - about the music service api interface
-|--------------------------------------------------
-*/
+ * Shared contract for music provider services.
+ * Full implementation planned for Phase 2 (provider strategy pattern).
+ */
 export interface MusicAPIInterface {
-  client_id: string;
-  client_secret: string;
-  redirect_uri: string;
-  state_key: string;
-  checkValidAuthorization();
-  isTokenValid();
-  getHashParams();
-  requestAuthorization();
-  endAuthorizationRequest();
-  getData();
-  getOptions();
-  getUserTracks();
+  stateKey: string;
+  checkValidAuthorization(): void;
+  isTokenValid(): boolean;
+  requestAuthorization(): void;
+  endAuthorizationRequest(): void;
+  getUserTracks(): unknown;
 }

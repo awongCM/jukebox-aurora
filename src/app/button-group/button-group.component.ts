@@ -1,15 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-button-group',
+  standalone: true,
   templateUrl: './button-group.component.html',
-  styleUrls: ['./button-group.component.scss']
+  styleUrl: './button-group.component.scss',
 })
-export class ButtonGroupComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class ButtonGroupComponent {}

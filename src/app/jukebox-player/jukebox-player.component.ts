@@ -1,15 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-jukebox-player',
+  standalone: true,
   templateUrl: './jukebox-player.component.html',
-  styleUrls: ['./jukebox-player.component.scss']
+  styleUrl: './jukebox-player.component.scss',
 })
-export class JukeboxPlayerComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class JukeboxPlayerComponent {}

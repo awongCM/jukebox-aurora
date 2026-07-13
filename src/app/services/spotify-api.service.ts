@@ -1,127 +1,224 @@
-import { Injectable } from "@angular/core";
-import { Http, RequestOptions, Response, Headers } from "@angular/http";
-import "rxjs/add/operator/map";
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-@Injectable()
+interface SpotifyTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token?: string;
+  scope: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class SpotifyAPIService {
-  client_id = "976b920abb9946b987f1dfe7e95c1942";
-  client_secret = "049a3cf08f10408183111691d56fd6c0";
-  redirect_uri = "http://localhost:4200";
-  state_key = "spotity_auth_state";
+  private readonly http = inject(HttpClient);
 
-  private accessToken: any = null;
-  private tokenType: string = null;
+  readonly redirectUri = environment.spotify.redirectUri;
+  readonly stateKey = 'spotify_auth_state';
+  private readonly codeVerifierKey = 'spotify_code_verifier';
+  private readonly accessTokenKey = 'spotify_access_token';
+  private readonly tokenTypeKey = 'spotify_token_type';
+  private readonly refreshTokenKey = 'spotify_refresh_token';
 
-  constructor(private http: Http) {}
+  private accessToken: string | null = null;
+  private tokenType: string | null = null;
 
-  /**
-   * checkValidAuthorization
-   */
-  public checkValidAuthorization(): void {
-    const hashParams = this.getHashParams(),
-      { access_token, token_type, state } = hashParams;
-
-    const storedState = localStorage.getItem(this.state_key);
-
-    if (access_token && (state == null || state !== storedState)) {
-      alert("Authentication Error detected");
-    } else {
-      localStorage.removeItem(this.state_key);
-      if (access_token) {
-        // remove hash
-        window.location.hash = "";
-
-        this.accessToken = access_token;
-        this.tokenType = token_type;
-      }
-    }
+  private get clientId(): string {
+    return environment.spotify.clientId;
   }
 
   /**
-   * isTokenValid
+   * Handles PKCE callback, restores a stored session, or returns false.
    */
-  public isTokenValid(): boolean {
+  initializeAuth(): Observable<SpotifyAuthResult> {
+    this.restoreStoredToken();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+      console.error('Spotify authorization denied:', error);
+      this.clearAuthQueryParams();
+      return of({ authenticated: false, error });
+    }
+
+    const code = urlParams.get('code');
+    if (!code) {
+      return of({ authenticated: this.isTokenValid() });
+    }
+
+    const state = urlParams.get('state');
+    const storedState = localStorage.getItem(this.stateKey);
+    if (!state || state !== storedState) {
+      console.error('Spotify state mismatch — possible CSRF attempt');
+      this.clearAuthQueryParams();
+      return of({ authenticated: false, error: 'state_mismatch' });
+    }
+
+    const codeVerifier = sessionStorage.getItem(this.codeVerifierKey);
+    if (!codeVerifier) {
+      console.error('Spotify code verifier missing from session');
+      this.clearAuthQueryParams();
+      return of({ authenticated: false, error: 'missing_code_verifier' });
+    }
+
+    return this.exchangeCodeForToken(code, codeVerifier).pipe(
+      tap(() => {
+        localStorage.removeItem(this.stateKey);
+        sessionStorage.removeItem(this.codeVerifierKey);
+        this.clearAuthQueryParams();
+      }),
+      map(() => ({ authenticated: true })),
+      catchError((err) => {
+        console.error('Spotify token exchange failed', err);
+        return of({ authenticated: false, error: 'token_exchange_failed' });
+      }),
+    );
+  }
+
+  isTokenValid(): boolean {
     return this.accessToken !== null;
   }
 
-  /**
-   * getHashParams
-   */
-  public getHashParams(): any {
-    const hashParams = {};
-    let e,
-      r = /([^&;=]+)=?([^&;]*)/g,
-      q = window.location.hash.substring(1);
-    while ((e = r.exec(q))) {
-      hashParams[e[1]] = decodeURIComponent(e[2]);
+  async requestAuthorization(): Promise<void> {
+    if (!this.clientId) {
+      alert('Spotify client ID is not configured. Set SPOTIFY_CLIENT_ID in GitHub Secrets/Variables (CI) or in a local .env file.');
+      return;
     }
-    return hashParams;
+
+    const stateValue = this.generateRandomString(16);
+    const codeVerifier = this.generateCodeVerifier();
+    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+
+    localStorage.setItem(this.stateKey, stateValue);
+    sessionStorage.setItem(this.codeVerifierKey, codeVerifier);
+
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: this.clientId,
+      scope: 'user-library-read',
+      redirect_uri: this.redirectUri,
+      state: stateValue,
+      code_challenge_method: 'S256',
+      code_challenge: codeChallenge,
+    });
+
+    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
   }
 
-  private generateRandomString(length): string {
-    let random_str = "";
-    const combinations =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < length; i++) {
-      random_str += combinations.charAt(
-        Math.floor(Math.random() * combinations.length)
-      );
-    }
-    return random_str;
-  }
-
-  /**
-   * requestAuthorization using implicit grant access only
-   */
-  public requestAuthorization(): void {
-    let authorizationTokenUrl = "https://accounts.spotify.com/authorize";
-
-    let state_value = this.generateRandomString(16);
-    localStorage.setItem(this.state_key, state_value);
-
-    let query_params = [
-      "?response_type=token",
-      `client_id=${this.client_id}`,
-      "scope=user-library-read",
-      `redirect_uri=${this.redirect_uri}`,
-      `state=${state_value}`
-    ].join("&");
-
-    window.location.href = authorizationTokenUrl + query_params;
-  }
-
-  /**
-   * endAuthorizationRequest
-   */
-  public endAuthorizationRequest(): void {
+  endAuthorizationRequest(): void {
     this.accessToken = null;
+    this.tokenType = null;
+    sessionStorage.removeItem(this.accessTokenKey);
+    sessionStorage.removeItem(this.tokenTypeKey);
+    sessionStorage.removeItem(this.refreshTokenKey);
+    sessionStorage.removeItem(this.codeVerifierKey);
+    localStorage.removeItem(this.stateKey);
   }
 
-  /**
-   * getData
-   */
-  public getData(api_url) {
-    const options = this.getOptions();
-
-    return this.http.get(api_url, options).map((res: Response) => res.json());
+  getData<T>(apiUrl: string): Observable<T> {
+    return this.http.get<T>(apiUrl, { headers: this.getHeaders() });
   }
 
-  /**
-   * getOptions
-   */
-  private getOptions(): any {
-    let headers = new Headers();
-    headers.append("Authorization", this.tokenType + " " + this.accessToken);
-    let options = new RequestOptions({ headers: headers });
-
-    return options;
+  getUserTracks(): Observable<SpotifySavedTracksResponse> {
+    return this.getData<SpotifySavedTracksResponse>('https://api.spotify.com/v1/me/tracks/');
   }
 
-  /**
-   * getUserTracks
-   */
-  public getUserTracks(): any {
-    return this.getData("https://api.spotify.com/v1/me/tracks/");
+  private exchangeCodeForToken(
+    code: string,
+    codeVerifier: string,
+  ): Observable<SpotifyTokenResponse> {
+    const body = new HttpParams()
+      .set('grant_type', 'authorization_code')
+      .set('code', code)
+      .set('redirect_uri', this.redirectUri)
+      .set('client_id', this.clientId)
+      .set('code_verifier', codeVerifier);
+
+    return this.http
+      .post<SpotifyTokenResponse>('https://accounts.spotify.com/api/token', body.toString(), {
+        headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }),
+      })
+      .pipe(tap((response) => this.persistToken(response)));
   }
+
+  private persistToken(response: SpotifyTokenResponse): void {
+    this.accessToken = response.access_token;
+    this.tokenType = response.token_type;
+    sessionStorage.setItem(this.accessTokenKey, response.access_token);
+    sessionStorage.setItem(this.tokenTypeKey, response.token_type);
+    if (response.refresh_token) {
+      sessionStorage.setItem(this.refreshTokenKey, response.refresh_token);
+    }
+  }
+
+  private restoreStoredToken(): void {
+    const token = sessionStorage.getItem(this.accessTokenKey);
+    if (token) {
+      this.accessToken = token;
+      this.tokenType = sessionStorage.getItem(this.tokenTypeKey) ?? 'Bearer';
+    }
+  }
+
+  private clearAuthQueryParams(): void {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `${this.tokenType} ${this.accessToken}`,
+    });
+  }
+
+  private generateRandomString(length: number): string {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    const combinations =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += combinations.charAt(array[i] % combinations.length);
+    }
+    return result;
+  }
+
+  private generateCodeVerifier(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return this.base64UrlEncode(array);
+  }
+
+  private async generateCodeChallenge(verifier: string): Promise<string> {
+    const data = new TextEncoder().encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return this.base64UrlEncode(new Uint8Array(digest));
+  }
+
+  private base64UrlEncode(buffer: Uint8Array): string {
+    const binary = Array.from(buffer, (byte) => String.fromCharCode(byte)).join('');
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+}
+
+export interface SpotifySavedTracksResponse {
+  items: {
+    track: {
+      id: string;
+      name: string;
+      preview_url: string | null;
+      track_number: number;
+      album: {
+        name: string;
+        images: { url: string }[];
+      };
+      artists: { name: string }[];
+    } | null;
+  }[];
+}
+
+export interface SpotifyAuthResult {
+  authenticated: boolean;
+  error?: string;
 }

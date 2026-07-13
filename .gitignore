@@ -4,6 +4,7 @@
 /dist
 /tmp
 /out-tsc
+/.angular/cache
 
 # dependencies
 /node_modules
@@ -36,6 +37,14 @@ testem.log
 # e2e
 /e2e/*.js
 /e2e/*.map
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# local environment config (generated — never commit secrets)
+.env
+src/environments/environment.ts
 
 # System Files
 .DS_Store

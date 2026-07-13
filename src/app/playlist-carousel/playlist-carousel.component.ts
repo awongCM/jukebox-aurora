@@ -1,15 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-playlist-carousel',
+  standalone: true,
   templateUrl: './playlist-carousel.component.html',
-  styleUrls: ['./playlist-carousel.component.scss']
+  styleUrl: './playlist-carousel.component.scss',
 })
-export class PlaylistCarouselComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class PlaylistCarouselComponent {}

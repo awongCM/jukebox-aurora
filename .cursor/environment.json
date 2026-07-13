@@ -1,0 +1,10 @@
+{
+  "install": "npm install && npm run env:generate",
+  "terminals": [
+    {
+      "name": "jukebox-dev",
+      "command": "npm start",
+      "ports": [4200]
+    }
+  ]
+}
