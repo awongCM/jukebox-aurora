@@ -9,7 +9,7 @@ export interface Track {
 
 /**
  * Shared contract for music provider services.
- * Full implementation planned for Phase 2 (provider strategy pattern).
+ * Full implementation planned for Phase 3 (provider strategy pattern).
  */
 export interface MusicAPIInterface {
   stateKey: string;

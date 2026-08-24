@@ -6,7 +6,7 @@ h1 {
 }
 
 .menu-container {
-  height: 100px;
+  min-height: 100px;
   text-align: center;
 }
 .menu-container .menu-inline-block{
@@ -16,6 +16,17 @@ h1 {
   label {
     font-size: 18px;
   }
+}
+
+.itunes-search {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.library-loading {
+  text-align: center;
+  color: #a2a1a1;
 }
 
 $color1: #f4f4f4;

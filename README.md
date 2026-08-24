@@ -61,6 +61,8 @@ Then run `npm start` (or `npm run env:generate` manually).
 2. Add Redirect URI: `http://127.0.0.1:4200`
 3. Use the same Client ID in GitHub Secret **and** local `.env`
 
+After Phase 2, Spotify login requests extra scopes for Web Playback SDK streaming. **Log out and log in again** if you still have a session from before this change; token refresh cannot add new scopes. Full-track playback requires Spotify Premium.
+
 ### Cursor Cloud Agents
 
 Cloud config: [`.cursor/environment.json`](.cursor/environment.json). Set `SPOTIFY_CLIENT_ID` in Cursor Cloud Secrets if agents need Spotify access. See [AGENTS.md](AGENTS.md).
@@ -91,16 +93,16 @@ GitHub Actions workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) r
 
 ## Features
 
-- Spotify library browsing (preview playback; full playback planned Phase 2)
-- Google Play Music integration via local proxy (deprecated provider)
+- Spotify library browsing (full-track playback via Web Playback SDK for Premium users; preview fallback)
+- iTunes Search integration (30-second preview playback, no auth required)
 - 3D perspective carousel with hover-to-scroll
 - Animated jukebox player with aurora border lighting
 - Fullscreen mode
-- Provider switching (Spotify / Google Play)
+- Provider switching (Spotify / iTunes)
 
 ## Planned (see MODERNIZATION_LOG.md)
 
-**Phase 2 (in progress):** Spotify token refresh, Web Playback SDK, iTunes search, replace Google Play Music
+**Phase 2 (complete for planned providers):** SoundCloud remains out of scope (blocked by original API constraints)
 
 **Phase 3:** Component architecture refactor (`MusicAPIInterface` strategy)
 
@@ -112,6 +114,7 @@ GitHub Actions workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) r
 
 | Version | Notes |
 |---------|-------|
+| **1.2.0** | Phase 2 music APIs — token refresh, Web Playback SDK, iTunes search |
 | **1.1.0** | Phase 1 modernization — Angular 19, HttpClient, ESLint, Playwright |
 | **1.0.0** | Original release — Angular 5, carousel, radio provider switching, fullscreen |
 

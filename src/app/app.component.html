@@ -1,7 +1,6 @@
 <div class="menu-container">
   <h1>{{title}}</h1>
-  <div *ngIf="!hasValidToken()" class="menu-inline-block">
-    <!-- TODO - UI components for other music api services -->
+  <div *ngIf="!isSpotifyAuthenticated()" class="menu-inline-block">
     <div class="form-check form-check-inline">
       <input type="radio" name="api-radio-group" 
           [checked]="selected_radio_api_service === 'SPM'" value="SPM" (change)="toggle_radio_api_server('SPM')">
@@ -9,12 +8,16 @@
     </div>
     <div class="form-check form-check-inline">
       <input type="radio" name="api-radio-group" 
-          [checked]="selected_radio_api_service === 'GPM'" value="GPM" (change)="toggle_radio_api_server('GPM')">
-      <label class="form-check-label" for="api-radio-group">Google Play</label>
+          [checked]="selected_radio_api_service === 'ITM'" value="ITM" (change)="toggle_radio_api_server('ITM')">
+      <label class="form-check-label" for="api-radio-group">iTunes</label>
     </div>
-    <button (click)="login()">Log In</button>
+    <button *ngIf="selected_radio_api_service === 'SPM'" (click)="login()">Log In</button>
+    <form *ngIf="isItunesSelected()" class="itunes-search" (submit)="onItunesSearch($event, itunesSearchInput.value)">
+      <input #itunesSearchInput type="search" placeholder="Search iTunes..." aria-label="Search iTunes">
+      <button type="submit">Search</button>
+    </form>
   </div>
-  <div *ngIf="hasValidToken()" class="menu-inline-block">
+  <div *ngIf="isSpotifyAuthenticated() || hasItunesResults()" class="menu-inline-block">
     <span></span>
     <button (click)="logout()">Log Out</button>
     <button class="toggleBtn" (click)="toggle()">Toggle</button>
@@ -23,10 +26,10 @@
 </div>
 
 
-<div *ngIf="hasValidToken()" id="fullscreen">
+<div *ngIf="isSpotifyAuthenticated() || hasItunesResults()" id="fullscreen">
+    <p *ngIf="libraryLoading" class="library-loading">Loading your library…</p>
     <div class="container">
         <ul (mouseover)="scroll_tracks($event)" class="gallery centerised" id="gallery">
-            <!-- Track metadata is now handled by Track Interface -->
             <li *ngFor="let track of tracks" (click)="track_select(track)">
               <img src="{{track.album_artwork}}" alt="{{track.album}}">
               <p>ID: {{track.id}}</p>
@@ -46,7 +49,6 @@
       <div class="controls">
         <a href="#" class="play" (click)="pause_play_track($event)"><i class="fa" [ngClass]="isPlaying ? 'fa-pause' : 'fa-play'"></i></a>
       </div>
-      <!-- TODO: to implement full music track playback https://beta.developer.spotify.com/documentation/web-playback-sdk/quick-start/  -->
-      <audio id="player_audio" controls *ngIf="selected_track" src="{{selected_track.stream_url}}" (ended)="reset_play_state()"></audio> 
+      <audio id="player_audio" controls *ngIf="selected_track && !useSpotifyPlayback" src="{{selected_track.stream_url}}" (ended)="reset_play_state()"></audio> 
     </div>
 </div>
