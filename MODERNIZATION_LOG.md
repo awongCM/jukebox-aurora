@@ -108,7 +108,7 @@ Scaffolded components (`JukeboxPlayerComponent`, `PlaylistCarouselComponent`, et
 | Phase | Focus | Status |
 |-------|-------|--------|
 | **1** | Toolchain, HttpClient, standalone bootstrap, env config, lint/e2e, CI | **Complete** |
-| **2** | Music APIs — Spotify PKCE, Web Playback SDK, token refresh, iTunes search, replace Google Play | **In progress** (~85%) |
+| **2** | Music APIs — Spotify PKCE, Web Playback SDK, token refresh, iTunes search, replace Google Play | **Complete** (SoundCloud out of scope) |
 | **3** | Extract carousel/player/button components; `MusicAPIInterface` strategy pattern | **Not started** |
 | **4** | UI polish — Web Audio visualizations, responsive layout, CSS modernization, a11y | **Not started** |
 | **5** | Secure backend token exchange; Render deployment | **Not started** |
@@ -171,6 +171,14 @@ Repo-level cloud environment config lives in [`.cursor/environment.json`](.curso
 ---
 
 ## Changelog
+
+### 2026-08-24 — Phase 2 review fixes
+
+- Restore expired Spotify sessions via stored refresh token (`initializeAuth` + `hasSession`)
+- Multicast in-flight token refresh with `shareReplay` so concurrent callers share one POST
+- Initialize Web Playback SDK only after Spotify auth; queue the selected track until the player is ready
+- Keep iTunes search available after results; migrate stored `GPM` provider selection to iTunes
+- Document that existing Spotify sessions must re-consent for streaming scopes
 
 ### 2025-07-13 — Phase 2 music APIs
 

@@ -1,6 +1,6 @@
 <div class="menu-container">
   <h1>{{title}}</h1>
-  <div *ngIf="!hasValidToken()" class="menu-inline-block">
+  <div *ngIf="!isSpotifyAuthenticated()" class="menu-inline-block">
     <div class="form-check form-check-inline">
       <input type="radio" name="api-radio-group" 
           [checked]="selected_radio_api_service === 'SPM'" value="SPM" (change)="toggle_radio_api_server('SPM')">
@@ -12,12 +12,12 @@
       <label class="form-check-label" for="api-radio-group">iTunes</label>
     </div>
     <button *ngIf="selected_radio_api_service === 'SPM'" (click)="login()">Log In</button>
-    <div *ngIf="showItunesSearch()" class="itunes-search">
+    <form *ngIf="isItunesSelected()" class="itunes-search" (submit)="onItunesSearch($event, itunesSearchInput.value)">
       <input #itunesSearchInput type="search" placeholder="Search iTunes..." aria-label="Search iTunes">
-      <button (click)="searchItunes(itunesSearchInput.value)">Search</button>
-    </div>
+      <button type="submit">Search</button>
+    </form>
   </div>
-  <div *ngIf="hasValidToken()" class="menu-inline-block">
+  <div *ngIf="isSpotifyAuthenticated() || hasItunesResults()" class="menu-inline-block">
     <span></span>
     <button (click)="logout()">Log Out</button>
     <button class="toggleBtn" (click)="toggle()">Toggle</button>
@@ -26,7 +26,8 @@
 </div>
 
 
-<div *ngIf="hasValidToken()" id="fullscreen">
+<div *ngIf="isSpotifyAuthenticated() || hasItunesResults()" id="fullscreen">
+    <p *ngIf="libraryLoading" class="library-loading">Loading your library…</p>
     <div class="container">
         <ul (mouseover)="scroll_tracks($event)" class="gallery centerised" id="gallery">
             <li *ngFor="let track of tracks" (click)="track_select(track)">

@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { SpotifyAPIService } from './services/spotify-api.service';
 import { SpotifyPlaybackService } from './services/spotify-playback.service';
 import { ItunesMusicSearchAPIService } from './services/itunes-music-api.service';
@@ -13,7 +14,7 @@ import { ScriptService } from './services/script.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   readonly spotifyAPI = inject(SpotifyAPIService);
   readonly spotifyPlayback = inject(SpotifyPlaybackService);
   readonly itunesAPI = inject(ItunesMusicSearchAPIService);
@@ -21,6 +22,7 @@ export class AppComponent implements OnInit {
 
   title = 'Welcome to my JukeBox Aurora App';
   tracks: Track[] = [];
+  libraryLoading = false;
 
   selected_radio_api_service: string | null = null;
   radio_api_service_state_key = 'selected_api_service';
@@ -41,11 +43,60 @@ export class AppComponent implements OnInit {
   private pageX = 0;
   private screenWidth = 0;
   private currentPosPercentage = 0;
+  private readonly subscriptions = new Subscription();
 
   constructor() {
     console.log('Hello Jukebox Aurora App initialised');
+  }
 
-    this.scriptService.loadScript('spotifysdk').then(() => {
+  ngOnInit(): void {
+    this.selected_radio_api_service = localStorage.getItem(this.radio_api_service_state_key);
+    this.migrateLegacyProviderSelection();
+    this.refreshTitle();
+
+    this.subscriptions.add(
+      this.spotifyPlayback.isPlaying$.subscribe((playing) => {
+        if (this.useSpotifyPlayback) {
+          this.isPlaying = playing;
+        }
+      }),
+    );
+
+    this.subscriptions.add(
+      this.spotifyPlayback.playbackUnavailable$.subscribe((unavailable) => {
+        if (unavailable && this.useSpotifyPlayback) {
+          this.useSpotifyPlayback = false;
+          this.isPlaying = false;
+        }
+      }),
+    );
+
+    if (this.selected_radio_api_service === 'SPM') {
+      this.spotifyAPI.initializeAuth().subscribe((result) => {
+        if (result.authenticated) {
+          this.prepareSpotifyPlayback();
+          this.loadSpotifyTracks();
+        } else if (result.error) {
+          alert(this.spotifyAuthErrorMessage(result.error));
+        }
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.endScroll();
+  }
+
+  private migrateLegacyProviderSelection(): void {
+    if (this.selected_radio_api_service === 'GPM') {
+      this.selected_radio_api_service = 'ITM';
+      localStorage.setItem(this.radio_api_service_state_key, 'ITM');
+    }
+  }
+
+  private prepareSpotifyPlayback(): void {
+    void this.scriptService.loadScript('spotifysdk').then(() => {
       this.spotifyPlayback.markSdkReady();
       window.onSpotifyWebPlaybackSDKReady = () => {
         this.spotifyPlayback.initializePlayer();
@@ -55,21 +106,6 @@ export class AppComponent implements OnInit {
         window.onSpotifyWebPlaybackSDKReady();
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.selected_radio_api_service = localStorage.getItem(this.radio_api_service_state_key);
-    this.refreshTitle();
-
-    if (this.selected_radio_api_service === 'SPM') {
-      this.spotifyAPI.initializeAuth().subscribe((result) => {
-        if (result.authenticated) {
-          this.loadSpotifyTracks();
-        } else if (result.error) {
-          alert(this.spotifyAuthErrorMessage(result.error));
-        }
-      });
-    }
   }
 
   private spotifyAuthErrorMessage(error: string): string {
@@ -90,18 +126,18 @@ export class AppComponent implements OnInit {
       this.title = 'Spotify Music Collection';
     } else if (this.selected_radio_api_service === 'ITM') {
       this.title = 'iTunes Music Search';
+    } else {
+      this.title = 'Welcome to my JukeBox Aurora App';
     }
   }
 
   login(): void {
-    if (!this.selected_radio_api_service) {
-      alert('Please select Spotify or iTunes before continuing.');
+    if (this.selected_radio_api_service !== 'SPM') {
+      alert('Please select Spotify before logging in.');
       return;
     }
 
-    if (this.selected_radio_api_service === 'SPM') {
-      void this.spotifyAPI.requestAuthorization();
-    }
+    void this.spotifyAPI.requestAuthorization();
   }
 
   searchItunes(term: string): void {
@@ -124,7 +160,13 @@ export class AppComponent implements OnInit {
     });
   }
 
+  onItunesSearch(event: Event, term: string): void {
+    event.preventDefault();
+    this.searchItunes(term);
+  }
+
   private loadSpotifyTracks(): void {
+    this.libraryLoading = true;
     this.spotifyAPI.getUserTracks().subscribe({
       next: (data) => {
         this.tracks = data.items.flatMap((item) => {
@@ -141,8 +183,10 @@ export class AppComponent implements OnInit {
             stream_url: item.track.preview_url ?? '',
           }];
         });
+        this.libraryLoading = false;
       },
       error: () => {
+        this.libraryLoading = false;
         alert('Failed to load your Spotify library. Try logging out and back in.');
       },
     });
@@ -201,10 +245,10 @@ export class AppComponent implements OnInit {
     this.resetAudioPlayer();
     this.useSpotifyPlayback = false;
 
-    if (this.selected_radio_api_service === 'SPM' && this.spotifyPlayback.isPlayerReady()) {
-      void this.spotifyPlayback.playTrack(track.id).then((started) => {
-        this.useSpotifyPlayback = started;
-        if (started) {
+    if (this.selected_radio_api_service === 'SPM') {
+      void this.spotifyPlayback.playTrack(track.id).then((result) => {
+        this.useSpotifyPlayback = result === 'started' || result === 'queued';
+        if (result === 'started') {
           this.isPlaying = true;
         }
       });
@@ -244,9 +288,7 @@ export class AppComponent implements OnInit {
     event.preventDefault();
 
     if (this.useSpotifyPlayback && this.spotifyPlayback.isPlayerReady()) {
-      void this.spotifyPlayback.togglePlay().then(() => {
-        this.isPlaying = this.spotifyPlayback.getIsPlaying();
-      });
+      void this.spotifyPlayback.togglePlay();
       return;
     }
 
@@ -334,17 +376,20 @@ export class AppComponent implements OnInit {
     }
   }
 
-  hasValidToken(): boolean {
-    if (this.selected_radio_api_service === 'SPM') {
-      return this.spotifyAPI.isTokenValid();
-    }
-    if (this.selected_radio_api_service === 'ITM') {
-      return this.tracks.length > 0;
-    }
-    return false;
+  isSpotifyAuthenticated(): boolean {
+    return this.selected_radio_api_service === 'SPM' && this.spotifyAPI.hasSession();
   }
 
-  showItunesSearch(): boolean {
-    return this.selected_radio_api_service === 'ITM' && !this.hasValidToken();
+  isItunesSelected(): boolean {
+    return this.selected_radio_api_service === 'ITM';
+  }
+
+  hasItunesResults(): boolean {
+    return this.isItunesSelected() && this.tracks.length > 0;
+  }
+
+  /** Template compatibility: Spotify session or iTunes search results. */
+  hasValidToken(): boolean {
+    return this.isSpotifyAuthenticated() || this.hasItunesResults();
   }
 }

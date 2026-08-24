@@ -109,6 +109,61 @@ describe('SpotifyAPIService', () => {
     expect(sessionStorage.getItem('spotify_refresh_token')).toBeNull();
   });
 
+  it('refreshes an expired stored session during initializeAuth', () => {
+    sessionStorage.setItem('spotify_access_token', 'expired-token');
+    sessionStorage.setItem('spotify_token_type', 'Bearer');
+    sessionStorage.setItem('spotify_refresh_token', 'refresh-token');
+    sessionStorage.setItem('spotify_token_expires_at', String(Date.now() - 1_000));
+
+    let result: SpotifyAuthResult = { authenticated: false };
+    service.initializeAuth().subscribe((authResult) => {
+      result = authResult;
+    });
+
+    const request = httpMock.expectOne('https://accounts.spotify.com/api/token');
+    expect(request.request.body).toContain('grant_type=refresh_token');
+    expect(request.request.body).toContain('refresh_token=refresh-token');
+    request.flush({
+      access_token: 'refreshed-token',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      scope: 'user-library-read streaming',
+    });
+
+    expect(result.authenticated).toBeTrue();
+    expect(service.isTokenValid()).toBeTrue();
+    expect(sessionStorage.getItem('spotify_access_token')).toBe('refreshed-token');
+  });
+
+  it('sends a single refresh request when two callers race', () => {
+    sessionStorage.setItem('spotify_access_token', 'expired-token');
+    sessionStorage.setItem('spotify_token_type', 'Bearer');
+    sessionStorage.setItem('spotify_refresh_token', 'refresh-token');
+    sessionStorage.setItem('spotify_token_expires_at', String(Date.now() - 1_000));
+
+    const tokens: string[] = [];
+    service.ensureValidToken().subscribe((token) => tokens.push(token));
+    service.ensureValidToken().subscribe((token) => tokens.push(token));
+
+    const requests = httpMock.match('https://accounts.spotify.com/api/token');
+    expect(requests.length).toBe(1);
+    requests[0].flush({
+      access_token: 'refreshed-token',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      scope: 'user-library-read',
+    });
+
+    expect(tokens).toEqual(['refreshed-token', 'refreshed-token']);
+  });
+
+  it('reports a restorable session when only a refresh token remains', () => {
+    sessionStorage.setItem('spotify_refresh_token', 'refresh-token');
+
+    expect(service.hasSession()).toBeTrue();
+    expect(service.isTokenValid()).toBeFalse();
+  });
+
   it('refreshes an expired access token', () => {
     sessionStorage.setItem('spotify_access_token', 'expired-token');
     sessionStorage.setItem('spotify_token_type', 'Bearer');

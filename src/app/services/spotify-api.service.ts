@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, expand, finalize, map, reduce, switchMap, tap } from 'rxjs/operators';
+import { Observable, EMPTY, of, throwError } from 'rxjs';
+import { catchError, expand, finalize, map, reduce, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 interface SpotifyTokenResponse {
@@ -62,10 +62,13 @@ export class SpotifyAPIService {
 
     const code = urlParams.get('code');
     if (!code) {
-      if (this.isTokenValid()) {
+      if (this.hasSession()) {
         return this.ensureValidToken().pipe(
           map(() => ({ authenticated: true })),
-          catchError(() => of({ authenticated: false, error: 'token_refresh_failed' })),
+          catchError(() => {
+            this.endAuthorizationRequest();
+            return of({ authenticated: false, error: 'token_refresh_failed' });
+          }),
         );
       }
       return of({ authenticated: false });
@@ -105,6 +108,17 @@ export class SpotifyAPIService {
   }
 
   /**
+   * True when a stored access or refresh token can restore a Spotify session.
+   * Unlike isTokenValid(), this stays true across access-token expiry.
+   */
+  hasSession(): boolean {
+    if (!this.accessToken) {
+      this.restoreStoredToken();
+    }
+    return this.accessToken !== null || sessionStorage.getItem(this.refreshTokenKey) !== null;
+  }
+
+  /**
    * Returns a valid access token, refreshing when expired or about to expire.
    */
   ensureValidToken(): Observable<string> {
@@ -129,6 +143,7 @@ export class SpotifyAPIService {
       finalize(() => {
         this.refreshInFlight = null;
       }),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     return this.refreshInFlight;
@@ -185,7 +200,7 @@ export class SpotifyAPIService {
     const initialUrl = 'https://api.spotify.com/v1/me/tracks/?limit=50';
 
     return this.getData<SpotifySavedTracksPage>(initialUrl).pipe(
-      expand((page) => (page.next ? this.getData<SpotifySavedTracksPage>(page.next) : of())),
+      expand((page) => (page.next ? this.getData<SpotifySavedTracksPage>(page.next) : EMPTY)),
       reduce(
         (accumulated, page) => ({
           items: [...accumulated.items, ...page.items],
